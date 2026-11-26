@@ -2077,9 +2077,9 @@
             opacity: 0;
             pointer-events: none;
             transition:
-                transform 0.72s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 0.52s ease 0.16s,
-                border-radius 0.55s ease;
+                transform 0.58s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.42s ease 0.14s,
+                border-radius 0.45s ease;
         }
 
         .farewell-chapter.is-flown .farewell-sheet {
@@ -2218,8 +2218,8 @@
             opacity: 0;
             transform: scale(0.55) rotate(8deg);
             transition:
-                opacity 0.45s ease 0.20s,
-                transform 0.56s cubic-bezier(0.22, 1, 0.36, 1) 0.20s;
+                opacity 0.36s ease 0.14s,
+                transform 0.44s cubic-bezier(0.22, 1, 0.36, 1) 0.14s;
             will-change: transform, opacity;
         }
 
@@ -2231,7 +2231,7 @@
         .origami-flight-layer.is-flying .origami-bird-mover {
             opacity: 1;
             transition: none;
-            animation: origamiSoarAway 2.15s cubic-bezier(0.28, 0.08, 0.35, 1) forwards;
+            animation: origamiSoarAway 1.85s cubic-bezier(0.28, 0.08, 0.35, 1) forwards;
         }
 
         .origami-bird-svg {
@@ -3604,7 +3604,7 @@
             var birdAnchor = document.getElementById('origami-bird-anchor');
             if (!farewell || !farewellSheet || !flightLayer) return;
 
-            var holdDelay = typeof initialDelayMs === 'number' ? initialDelayMs : 2300;
+            var holdDelay = typeof initialDelayMs === 'number' ? initialDelayMs : 1100;
 
             // Phase 1: Fold the entire farewell card into the origami bird
             farewellTimers.push(setTimeout(function() {
@@ -3632,13 +3632,13 @@
                         requestAnimationFrame(function() {
                             farewell.classList.add('is-post-visible');
                         });
-                    }, 1350));
+                    }, 1050));
 
                     // Clean up flight layer once bird exits sky
                     farewellTimers.push(setTimeout(function() {
                         flightLayer.classList.remove('is-active', 'is-folding', 'is-flying');
-                    }, 2250));
-                }, 740));
+                    }, 1950));
+                }, 580));
             }, holdDelay));
         }
 
@@ -3650,7 +3650,7 @@
             requestAnimationFrame(function() {
                 requestAnimationFrame(function() {
                     farewell.classList.add('is-shown');
-                    startFarewellOrigamiSequence(1900);
+                    startFarewellOrigamiSequence(950);
                 });
             });
         }
@@ -4101,7 +4101,7 @@
                             startStoryRoute(260);
                         }
                         if (toSlide.id === 'farewell') {
-                            startFarewellOrigamiSequence(2300);
+                            startFarewellOrigamiSequence(1100);
                         }
                     });
                 });
