@@ -327,7 +327,7 @@
             inset: 0;
             display: flex;
             flex-direction: column;
-            padding: 24px 14px;
+            padding: 0 14px;
             width: 100%;
             overflow-y: auto;
             overflow-x: hidden;
@@ -341,6 +341,14 @@
             pointer-events: none;
             z-index: 1;
             transition: opacity 0.42s ease, visibility 0s linear 0.42s;
+        }
+
+        .album-chapter::before,
+        .album-chapter::after {
+            content: '';
+            display: block;
+            flex: 1 0 32px;
+            pointer-events: none;
         }
 
         .album-chapter.is-active {
@@ -366,15 +374,11 @@
         /* ==========================================================================
            5. INTRO COVER ONLY — SAND-LINEN HARDCOVER ALBUM (#cover)
            ========================================================================== */
-        .cover-chapter {
-            padding: 24px 14px;
-        }
-
         .album-book-stage {
             position: relative;
             width: 100%;
             max-width: 720px;
-            margin: auto;
+            margin: 0 auto;
             flex-shrink: 0;
             perspective: 3200px;
             transform-style: preserve-3d;
@@ -751,7 +755,7 @@
         .editorial-sheet {
             width: 100%;
             max-width: 820px;
-            margin: auto;
+            margin: 0 auto;
             flex-shrink: 0;
             background-color: var(--bg-cotton);
             border: 1px solid var(--border-card);
@@ -2150,7 +2154,7 @@
             display: none;
             width: 100%;
             max-width: 520px;
-            margin: auto;
+            margin: 0 auto;
             flex-shrink: 0;
             padding: 32px 24px;
             text-align: center;
@@ -2379,7 +2383,13 @@
                 padding: 0;
             }
             .album-chapter {
-                padding: 18px 10px 64px;
+                padding: 0 10px;
+            }
+            .album-chapter::before {
+                flex: 1 0 max(28px, env(safe-area-inset-top));
+            }
+            .album-chapter::after {
+                flex: 1 0 74px;
             }
             .linen-cover {
                 padding: 18px 12px 16px 28px;
