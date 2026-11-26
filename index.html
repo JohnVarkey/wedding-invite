@@ -170,12 +170,16 @@
             scroll-behavior: auto;
             background-color: var(--bg-backdrop);
             color: var(--ink-espresso);
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
 
         html::-webkit-scrollbar,
-        body::-webkit-scrollbar {
+        body::-webkit-scrollbar,
+        .album-chapter::-webkit-scrollbar {
             display: none;
             width: 0;
             height: 0;
@@ -184,21 +188,25 @@
         body {
             margin: 0;
             padding: 0;
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
             background-color: var(--bg-backdrop);
             color: var(--ink-espresso);
             font-family: var(--font-sans);
             line-height: 1.65;
-            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         .album-world {
+            position: relative;
             background-color: var(--bg-backdrop);
             background-image: radial-gradient(var(--dot-grid) 1px, transparent 0);
             background-size: 24px 24px;
-            min-height: 100vh;
+            height: 100dvh;
             width: 100%;
+            overflow: hidden;
             transition: background-color 0.25s ease;
         }
 
@@ -262,7 +270,10 @@
 
         .edge-fill {
             position: absolute;
-            transition: box-shadow 0.35s ease;
+            transition:
+                width 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+                height 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.45s ease;
         }
 
         .edge-top {
@@ -302,46 +313,158 @@
         }
 
         /* ==========================================================================
-           4. SINGLE-CARD-PER-VIEWPORT FULL-SCREEN FLOW
+           4. IN-PLACE STACKED CARD DECK (NO DOWNWARD SCROLL)
            ========================================================================== */
         .album-main {
-            max-width: 860px;
-            margin: 0 auto;
-            padding: 0 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 0;
             position: relative;
             z-index: 10;
             width: 100%;
+            height: 100%;
         }
 
         .album-chapter {
-            min-height: 100dvh;
+            position: fixed;
+            inset: 0;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px 0;
-            scroll-margin-top: 0;
+            flex-direction: column;
+            padding: 24px 14px;
             width: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            z-index: 1;
+            transition: opacity 0.42s ease, visibility 0s linear 0.42s;
+        }
+
+        .album-chapter.is-active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            z-index: 5;
+            transition: none;
+        }
+
+        .album-chapter.is-leaving {
+            opacity: 0;
+            visibility: visible;
+            pointer-events: none;
+            z-index: 4;
+            transition: opacity 0.26s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.26s;
+        }
+
+        .cover-chapter.is-leaving {
+            transition: opacity 0.30s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.30s;
         }
 
         /* ==========================================================================
            5. INTRO COVER ONLY — SAND-LINEN HARDCOVER ALBUM (#cover)
            ========================================================================== */
         .cover-chapter {
-            min-height: 100dvh;
+            padding: 24px 14px;
+        }
+
+        .album-book-stage {
+            position: relative;
+            width: 100%;
+            max-width: 720px;
+            margin: auto;
+            perspective: 3200px;
+            transform-style: preserve-3d;
+            transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .cover-chapter.is-album-opening .album-book-stage,
+        .cover-chapter.is-album-open .album-book-stage {
+            transform: scale(0.99);
+        }
+
+        .cover-chapter.is-leaving .album-book-stage {
+            transform: scale(0.975);
+            transition: transform 0.30s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .album-inner-page {
+            position: absolute;
+            inset: 0;
+            border-radius: 6px 18px 18px 6px;
+            background-color: var(--bg-cotton);
+            background-image: radial-gradient(var(--dot-grid) 1px, transparent 0);
+            background-size: 20px 20px;
+            border: 1px solid var(--border-card);
+            box-shadow:
+                inset 22px 0 34px rgba(0, 0, 0, 0.34),
+                inset -3px 0 0 var(--bg-surface),
+                inset -5px 0 0 var(--border-card),
+                0 18px 42px var(--shadow-ink);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px 0;
+            padding: 28px 32px 28px 48px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+            transition: opacity 0.28s ease;
+        }
+
+        .cover-chapter.is-album-opening .album-inner-page,
+        .cover-chapter.is-album-open .album-inner-page {
+            opacity: 1;
+        }
+
+        .album-page-gutter {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 24px;
+            border-radius: 6px 0 0 6px;
+            background: linear-gradient(90deg, var(--spine-start) 0%, rgba(0, 0, 0, 0.28) 55%, transparent 100%);
+        }
+
+        .album-inner-ornament {
+            text-align: center;
+            color: var(--kasavu-gold);
+            font-size: 1.15rem;
+            opacity: 0;
+            transform: scale(0.92);
+            transition:
+                opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.12s,
+                transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.12s;
+        }
+
+        .cover-chapter.is-album-opening .album-inner-ornament,
+        .cover-chapter.is-album-open .album-inner-ornament {
+            opacity: 0.72;
+            transform: scale(1);
+        }
+
+        .album-cover-leaf {
+            position: relative;
+            width: 100%;
+            z-index: 2;
+            transform-style: preserve-3d;
+            transform-origin: left center;
+            transform: rotateY(0deg);
+            transition:
+                transform 0.68s cubic-bezier(0.22, 0.85, 0.3, 1),
+                opacity 0.38s ease 0.18s;
+            will-change: transform, opacity;
+        }
+
+        .cover-chapter.is-album-opening .album-cover-leaf,
+        .cover-chapter.is-album-open .album-cover-leaf {
+            transform: translateX(-24px) rotateY(-68deg);
+            opacity: 0;
+            pointer-events: none;
         }
 
         .linen-cover {
             position: relative;
             width: 100%;
-            max-width: 720px;
-            margin: 0 auto;
             background-color: var(--bg-linen);
             background-image:
                 repeating-linear-gradient(0deg, var(--linen-weave) 0px, var(--linen-weave) 1px, transparent 1px, transparent 4px),
@@ -359,6 +482,10 @@
             overflow: hidden;
         }
 
+        .linen-cover-inside {
+            display: none;
+        }
+
         @media (min-width: 640px) {
             .linen-cover {
                 padding: 32px 40px 28px 60px;
@@ -372,6 +499,7 @@
             bottom: 0;
             left: 0;
             width: 26px;
+            border-radius: 6px 0 0 6px;
             background: linear-gradient(90deg, var(--spine-start) 0%, var(--bg-linen) 45%, var(--spine-mid) 85%, var(--bg-linen) 100%);
             border-right: 1px solid var(--border-cover);
             box-shadow: inset -2px 0 4px var(--shadow-ink);
@@ -598,12 +726,18 @@
             text-decoration: none;
             white-space: nowrap;
             justify-self: center;
-            transition: background-color 0.2s ease, transform 0.2s ease;
+            transition: background-color 0.22s ease, border-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
         }
 
         .open-album-btn:hover {
             background-color: var(--kasavu-gold-tint);
-            transform: translateY(1px);
+            border-color: var(--border-gold);
+            box-shadow: 0 4px 14px var(--card-shadow-accent);
+            transform: translateY(-1px);
+        }
+
+        .open-album-btn:active {
+            transform: scale(0.97);
         }
 
         /* ==========================================================================
@@ -613,7 +747,7 @@
         .editorial-sheet {
             width: 100%;
             max-width: 820px;
-            margin: 0 auto;
+            margin: auto;
             background-color: var(--bg-cotton);
             border: 1px solid var(--border-card);
             border-radius: 18px;
@@ -621,6 +755,38 @@
             padding: 24px 20px;
             position: relative;
             overflow: hidden;
+        }
+
+        .album-chapter .editorial-sheet {
+            opacity: 0;
+            transform: scale(0.965);
+            transition:
+                opacity 0.50s cubic-bezier(0.22, 1, 0.36, 1) 0.10s,
+                transform 0.56s cubic-bezier(0.22, 1, 0.36, 1) 0.10s;
+            will-change: opacity, transform;
+        }
+
+        .album-chapter.is-shown .editorial-sheet {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .album-chapter.is-leaving .editorial-sheet {
+            opacity: 1;
+            transform: scale(0.975);
+            transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .album-book-stage,
+            .album-inner-page,
+            .album-inner-ornament,
+            .album-cover-leaf,
+            .album-chapter .editorial-sheet {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+            }
         }
 
         @media (min-width: 640px) {
@@ -789,14 +955,96 @@
             line-height: 1.55;
         }
 
+        .invitation-header-block {
+            transform: translate3d(0, var(--invite-center-y, 185px), 0);
+            transition: transform 0.96s cubic-bezier(0.22, 1, 0.36, 1) 0.08s;
+            will-change: transform;
+        }
+
+        .editorial-sheet.is-details-shown .invitation-header-block {
+            transform: translate3d(0, 0, 0);
+        }
+
+        .invite-names-morph {
+            display: grid;
+            align-items: center;
+            justify-items: center;
+            margin: 12px 0;
+        }
+
         .invite-names {
             font-family: var(--font-serif);
             font-size: clamp(2.1rem, 4.8vw, 2.95rem);
             font-weight: 600;
             color: var(--ink-primary);
-            margin: 12px 0;
+            margin: 0;
             line-height: 1.14;
             white-space: nowrap;
+        }
+
+        .invite-names-full-wrap,
+        .invite-names-short {
+            grid-area: 1 / 1;
+        }
+
+        .invite-names-full-wrap {
+            display: grid;
+            grid-template-rows: 1fr;
+            transition: grid-template-rows 0.78s cubic-bezier(0.22, 1, 0.36, 1) 0.08s;
+        }
+
+        .invite-names-full-inner {
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .invite-names-full {
+            font-size: clamp(1.56rem, 4.1vw, 2.42rem);
+            line-height: 1.18;
+            white-space: normal;
+            padding: 4px 0;
+            opacity: 1;
+            transform: scale(1);
+            filter: blur(0);
+            will-change: opacity, transform, filter;
+            transition:
+                opacity 0.48s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.56s cubic-bezier(0.4, 0, 0.2, 1),
+                filter 0.48s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .invite-names-full > span {
+            display: block;
+        }
+
+        .invite-names-short {
+            opacity: 0;
+            transform: scale(0.95);
+            filter: blur(6px);
+            pointer-events: none;
+            will-change: opacity, transform, filter;
+            transition:
+                opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.22s,
+                transform 0.82s cubic-bezier(0.22, 1, 0.36, 1) 0.22s,
+                filter 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.22s;
+        }
+
+        .editorial-sheet.is-details-shown .invite-names-full-wrap {
+            grid-template-rows: 0fr;
+            pointer-events: none;
+        }
+
+        .editorial-sheet.is-details-shown .invite-names-full {
+            opacity: 0;
+            transform: scale(0.94);
+            filter: blur(6px);
+        }
+
+        .editorial-sheet.is-details-shown .invite-names-short {
+            opacity: 1;
+            transform: scale(1);
+            filter: blur(0);
+            pointer-events: auto;
         }
 
         .invite-names .invite-amp {
@@ -806,6 +1054,54 @@
             font-size: 0.9em;
             color: var(--kasavu-gold);
             padding: 0 6px;
+        }
+
+        .invite-names-full .invite-amp {
+            display: block;
+            font-size: 0.85em;
+            padding: 2px 0;
+        }
+
+        .invitation-details-reveal {
+            pointer-events: none;
+        }
+
+        .editorial-sheet.is-details-shown .invitation-details-reveal {
+            pointer-events: auto;
+        }
+
+        .invitation-details-reveal .lotus-divider,
+        .invitation-details-reveal .wedding-datetime-card,
+        .invitation-details-reveal .countdown-card {
+            opacity: 0;
+            transform: scale(0.96);
+            filter: blur(7px);
+            will-change: opacity, transform, filter;
+            transition:
+                opacity 0.86s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.94s cubic-bezier(0.22, 1, 0.36, 1),
+                filter 0.86s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .editorial-sheet.is-details-shown .invitation-details-reveal .lotus-divider {
+            opacity: 1;
+            transform: scale(1);
+            filter: blur(0);
+            transition-delay: 0.24s;
+        }
+
+        .editorial-sheet.is-details-shown .invitation-details-reveal .wedding-datetime-card {
+            opacity: 1;
+            transform: scale(1);
+            filter: blur(0);
+            transition-delay: 0.36s;
+        }
+
+        .editorial-sheet.is-details-shown .invitation-details-reveal .countdown-card {
+            opacity: 1;
+            transform: scale(1);
+            filter: blur(0);
+            transition-delay: 0.48s;
         }
 
         .wedding-datetime-card {
@@ -963,8 +1259,24 @@
                 pointer-events: auto !important;
                 transition: none !important;
             }
-            .scripture-veil {
+            .scripture-veil,
+            .invite-names-full-wrap {
                 display: none;
+            }
+            .invitation-header-block {
+                transform: none !important;
+                transition: none !important;
+            }
+            .invite-names-short,
+            .invitation-details-reveal,
+            .invitation-details-reveal .lotus-divider,
+            .invitation-details-reveal .wedding-datetime-card,
+            .invitation-details-reveal .countdown-card {
+                opacity: 1 !important;
+                transform: none !important;
+                filter: none !important;
+                pointer-events: auto !important;
+                transition: none !important;
             }
         }
 
@@ -1700,6 +2012,18 @@
 
         .rsvp-receipt.is-visible {
             display: block;
+            animation: cardAppearPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes cardAppearPop {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .receipt-badge {
@@ -1726,6 +2050,291 @@
             text-decoration: underline;
             cursor: pointer;
             margin-top: 14px;
+        }
+
+        /* ==========================================================================
+           10B. FINAL FAREWELL CARD -> ORIGAMI BIRD FLIGHT (#farewell)
+           ========================================================================== */
+        .farewell-chapter {
+            perspective: 1400px;
+        }
+
+        .farewell-sheet {
+            min-height: 390px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: linear-gradient(155deg, var(--bg-cotton) 58%, var(--kasavu-gold-tint) 100%);
+            border: 1px solid var(--border-gold);
+            transform-origin: center center;
+        }
+
+        .farewell-chapter.is-folding .farewell-sheet {
+            transform: perspective(1100px) rotateX(34deg) rotateZ(-6deg) scale(0.22, 0.30);
+            border-radius: 6px;
+            opacity: 0;
+            pointer-events: none;
+            transition:
+                transform 0.72s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.52s ease 0.16s,
+                border-radius 0.55s ease;
+        }
+
+        .farewell-chapter.is-flown .farewell-sheet {
+            display: none;
+        }
+
+        .origami-creases {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.28s ease;
+        }
+
+        .farewell-chapter.is-folding .origami-creases {
+            opacity: 0.9;
+        }
+
+        .farewell-card-copy {
+            position: relative;
+            z-index: 2;
+            max-width: 480px;
+            margin: 0 auto;
+            transition: opacity 0.28s ease, transform 0.36s ease;
+        }
+
+        .farewell-chapter.is-folding .farewell-card-copy {
+            opacity: 0;
+            transform: scale(0.92);
+        }
+
+        .farewell-title {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 4.4vw, 2.75rem);
+            font-weight: 600;
+            color: var(--ink-primary);
+            margin: 0 0 10px;
+            line-height: 1.15;
+        }
+
+        .farewell-copy {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: clamp(1.12rem, 2.4vw, 1.32rem);
+            color: var(--ink-body);
+            margin: 0 auto 18px;
+            max-width: 420px;
+            line-height: 1.55;
+        }
+
+        .farewell-signoff {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--kasavu-gold-deep);
+        }
+
+        .farewell-after {
+            display: none;
+            width: 100%;
+            max-width: 520px;
+            margin: auto;
+            padding: 32px 24px;
+            text-align: center;
+            background-color: var(--bg-cotton);
+            border: 1px solid var(--border-card);
+            border-radius: 18px;
+            box-shadow: 0 12px 30px var(--shadow-ink);
+            opacity: 0;
+            transform: scale(0.97);
+            transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .farewell-chapter.is-flown .farewell-after {
+            display: block;
+        }
+
+        .farewell-chapter.is-post-visible .farewell-after {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .farewell-after-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid var(--accent-soft-30);
+            font-size: 0.78rem;
+        }
+
+        .farewell-replay-btn {
+            background: none;
+            border: none;
+            color: var(--kasavu-gold-deep);
+            font-family: var(--font-sans);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            transition: color 0.2s ease;
+        }
+
+        .farewell-replay-btn:hover {
+            color: var(--ink-primary);
+        }
+
+        /* Full-viewport layer inside #farewell so the origami bird can soar freely */
+        .origami-flight-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 25;
+            overflow: hidden;
+            display: none;
+        }
+
+        .origami-flight-layer.is-active {
+            display: block;
+        }
+
+        .origami-bird-anchor {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .origami-bird-mover {
+            opacity: 0;
+            transform: scale(0.55) rotate(8deg);
+            transition:
+                opacity 0.45s ease 0.20s,
+                transform 0.56s cubic-bezier(0.22, 1, 0.36, 1) 0.20s;
+            will-change: transform, opacity;
+        }
+
+        .origami-flight-layer.is-folding .origami-bird-mover {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+
+        .origami-flight-layer.is-flying .origami-bird-mover {
+            opacity: 1;
+            transition: none;
+            animation: origamiSoarAway 2.15s cubic-bezier(0.28, 0.08, 0.35, 1) forwards;
+        }
+
+        .origami-bird-svg {
+            display: block;
+            width: 118px;
+            height: 98px;
+            filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.36));
+            overflow: visible;
+        }
+
+        .origami-wing-front {
+            transform-origin: 58px 54px;
+        }
+
+        .origami-wing-back {
+            transform-origin: 54px 50px;
+        }
+
+        .origami-flight-layer.is-flying .origami-wing-front {
+            animation: origamiWingFront 0.38s ease-in-out infinite alternate;
+        }
+
+        .origami-flight-layer.is-flying .origami-wing-back {
+            animation: origamiWingBack 0.38s ease-in-out infinite alternate;
+        }
+
+        .origami-sparkle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--kasavu-gold);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .origami-flight-layer.is-flying .origami-sparkle.s1 {
+            animation: sparkleTrail 1.1s ease-out 0.12s forwards;
+        }
+
+        .origami-flight-layer.is-flying .origami-sparkle.s2 {
+            animation: sparkleTrail 1.25s ease-out 0.32s forwards;
+        }
+
+        .origami-flight-layer.is-flying .origami-sparkle.s3 {
+            animation: sparkleTrail 1.2s ease-out 0.56s forwards;
+        }
+
+        @keyframes origamiWingFront {
+            0% { transform: scaleY(1) rotate(0deg); }
+            100% { transform: scaleY(0.32) rotate(12deg); }
+        }
+
+        @keyframes origamiWingBack {
+            0% { transform: scaleY(1) rotate(0deg); }
+            100% { transform: scaleY(0.45) rotate(-10deg); }
+        }
+
+        @keyframes origamiSoarAway {
+            0% {
+                transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            20% {
+                transform: translate3d(8vw, -5vh, 0) rotate(-12deg) scale(0.96);
+                opacity: 1;
+            }
+            55% {
+                transform: translate3d(26vw, -22vh, 0) rotate(-18deg) scale(0.72);
+                opacity: 0.95;
+            }
+            84% {
+                transform: translate3d(44vw, -39vh, 0) rotate(-22deg) scale(0.40);
+                opacity: 0.65;
+            }
+            100% {
+                transform: translate3d(56vw, -52vh, 0) rotate(-25deg) scale(0.22);
+                opacity: 0;
+            }
+        }
+
+        @keyframes sparkleTrail {
+            0% {
+                transform: translate3d(-10px, 6px, 0) scale(0.4);
+                opacity: 0;
+            }
+            25% {
+                opacity: 0.9;
+            }
+            100% {
+                transform: translate3d(-44px, 28px, 0) scale(0.1);
+                opacity: 0;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .origami-flight-layer,
+            .origami-creases {
+                display: none !important;
+            }
+            .farewell-sheet {
+                transition: none !important;
+            }
         }
 
         .album-colophon {
@@ -1761,11 +2370,10 @@
            ========================================================================== */
         @media (max-width: 560px) {
             .album-main {
-                padding: 0 10px;
-                gap: 0;
+                padding: 0;
             }
             .album-chapter {
-                padding: 18px 0 64px;
+                padding: 18px 10px 64px;
             }
             .linen-cover {
                 padding: 18px 12px 16px 28px;
@@ -1773,6 +2381,12 @@
             }
             .spine-crease {
                 width: 18px;
+            }
+            .album-cover-leaf {
+                transform-origin: 9px center;
+            }
+            .album-inner-page {
+                padding: 20px 20px 20px 32px;
             }
             .stamp-assembly {
                 gap: 12px;
@@ -2018,61 +2632,70 @@
             <!-- =================================================================
                  INTRO COVER ONLY — HARDCOVER ALBUM STYLE (#cover)
                  ================================================================= -->
-            <section id="cover" class="album-chapter cover-chapter is-shown">
-                <article class="linen-cover">
-                    <div class="spine-crease" aria-hidden="true"></div>
-
-                    <div class="cover-top">
-                        <h1 class="cover-headline">Our Wedding Story</h1>
+            <section id="cover" class="album-chapter cover-chapter is-active is-shown">
+                <div class="album-book-stage">
+                    <div class="album-inner-page" aria-hidden="true">
+                        <div class="album-page-gutter"></div>
+                        <div class="album-inner-ornament">✦</div>
                     </div>
 
-                    <div class="stamp-assembly">
-                        <!-- Left Breeze-Swaying Botanical Sprig -->
-                        <svg class="cover-sprig cover-sprig-left" viewBox="0 0 48 112" fill="none" aria-hidden="true">
-                            <path d="M40 104 C28 76, 18 46, 12 14" stroke="var(--ink-primary)" stroke-width="1.5" stroke-linecap="round"/>
-                            <path d="M27 76 C18 71, 12 72, 8 76 C15 79, 22 79, 27 76 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
-                            <path d="M21 54 C12 48, 7 50, 4 54 C11 57, 16 57, 21 54 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
-                            <path d="M16 33 C9 28, 5 30, 3 34 C9 36, 13 36, 16 33 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
-                            <circle cx="32" cy="64" r="3.2" fill="var(--ink-primary)" stroke="var(--kasavu-gold)" stroke-width="1.3"/>
-                            <circle cx="25" cy="42" r="3" fill="var(--ink-primary)" stroke="var(--kasavu-gold)" stroke-width="1.3"/>
-                            <circle cx="12" cy="12" r="3.5" fill="var(--kasavu-gold)"/>
-                        </svg>
+                    <div class="album-cover-leaf">
+                        <article class="linen-cover">
+                            <div class="spine-crease" aria-hidden="true"></div>
 
-                        <!-- Embossed Perforated Postage Stamp -->
-                        <div class="postage-stamp">
-                            <span class="stamp-est">EST. 2027</span>
-                            <div class="stamp-monogram">M<span class="amp">&amp;</span>J</div>
-                            <div class="stamp-caption-row">
-                                <span class="stamp-rule"></span>
-                                <span>Wedding Invitation</span>
-                                <span class="stamp-rule"></span>
+                            <div class="cover-top">
+                                <h1 class="cover-headline">Our Wedding Story</h1>
                             </div>
 
-                            <div class="postmark-badge" aria-hidden="true">
-                                <small>12</small>
-                                <strong>JULY</strong>
-                                <small>2027</small>
+                            <div class="stamp-assembly">
+                                <!-- Left Breeze-Swaying Botanical Sprig -->
+                                <svg class="cover-sprig cover-sprig-left" viewBox="0 0 48 112" fill="none" aria-hidden="true">
+                                    <path d="M40 104 C28 76, 18 46, 12 14" stroke="var(--ink-primary)" stroke-width="1.5" stroke-linecap="round"/>
+                                    <path d="M27 76 C18 71, 12 72, 8 76 C15 79, 22 79, 27 76 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
+                                    <path d="M21 54 C12 48, 7 50, 4 54 C11 57, 16 57, 21 54 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
+                                    <path d="M16 33 C9 28, 5 30, 3 34 C9 36, 13 36, 16 33 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
+                                    <circle cx="32" cy="64" r="3.2" fill="var(--ink-primary)" stroke="var(--kasavu-gold)" stroke-width="1.3"/>
+                                    <circle cx="25" cy="42" r="3" fill="var(--ink-primary)" stroke="var(--kasavu-gold)" stroke-width="1.3"/>
+                                    <circle cx="12" cy="12" r="3.5" fill="var(--kasavu-gold)"/>
+                                </svg>
+
+                                <!-- Embossed Perforated Postage Stamp -->
+                                <div class="postage-stamp">
+                                    <span class="stamp-est">EST. 2027</span>
+                                    <div class="stamp-monogram">M<span class="amp">&amp;</span>J</div>
+                                    <div class="stamp-caption-row">
+                                        <span class="stamp-rule"></span>
+                                        <span>Wedding Invitation</span>
+                                        <span class="stamp-rule"></span>
+                                    </div>
+
+                                    <div class="postmark-badge" aria-hidden="true">
+                                        <small>12</small>
+                                        <strong>JULY</strong>
+                                        <small>2027</small>
+                                    </div>
+                                </div>
+
+                                <!-- Right Breeze-Swaying Botanical Sprig -->
+                                <svg class="cover-sprig cover-sprig-right" viewBox="0 0 48 112" fill="none" aria-hidden="true">
+                                    <path d="M8 104 C20 76, 30 46, 36 14" stroke="var(--ink-primary)" stroke-width="1.5" stroke-linecap="round"/>
+                                    <path d="M21 76 C30 71, 36 72, 40 76 C33 79, 26 79, 21 76 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
+                                    <path d="M27 54 C36 48, 41 50, 44 54 C37 57, 32 57, 27 54 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
+                                    <path d="M32 33 C39 28, 43 30, 45 34 C39 36, 35 36, 32 33 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
+                                    <circle cx="16" cy="64" r="3.2" fill="var(--ink-primary)" stroke="var(--kasavu-gold)" stroke-width="1.3"/>
+                                    <circle cx="23" cy="42" r="3" fill="var(--ink-primary)" stroke="var(--kasavu-gold)" stroke-width="1.3"/>
+                                    <circle cx="36" cy="12" r="3.5" fill="var(--kasavu-gold)"/>
+                                </svg>
                             </div>
-                        </div>
 
-                        <!-- Right Breeze-Swaying Botanical Sprig -->
-                        <svg class="cover-sprig cover-sprig-right" viewBox="0 0 48 112" fill="none" aria-hidden="true">
-                            <path d="M8 104 C20 76, 30 46, 36 14" stroke="var(--ink-primary)" stroke-width="1.5" stroke-linecap="round"/>
-                            <path d="M21 76 C30 71, 36 72, 40 76 C33 79, 26 79, 21 76 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
-                            <path d="M27 54 C36 48, 41 50, 44 54 C37 57, 32 57, 27 54 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
-                            <path d="M32 33 C39 28, 43 30, 45 34 C39 36, 35 36, 32 33 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
-                            <circle cx="16" cy="64" r="3.2" fill="var(--ink-primary)" stroke="var(--kasavu-gold)" stroke-width="1.3"/>
-                            <circle cx="23" cy="42" r="3" fill="var(--ink-primary)" stroke="var(--kasavu-gold)" stroke-width="1.3"/>
-                            <circle cx="36" cy="12" r="3.5" fill="var(--kasavu-gold)"/>
-                        </svg>
+                            <div class="cover-bottom">
+                                <div class="cover-couple">Manna Ann Mariyam</div>
+                                <a href="#invitation" class="open-album-btn">SCROLL TO OPEN ↓</a>
+                                <div class="cover-couple is-right">John K. Varkey</div>
+                            </div>
+                        </article>
                     </div>
-
-                    <div class="cover-bottom">
-                        <div class="cover-couple">Manna Ann Mariyam</div>
-                        <a href="#invitation" class="open-album-btn">SCROLL TO OPEN ↓</a>
-                        <div class="cover-couple is-right">John K. Varkey</div>
-                    </div>
-                </article>
+                </div>
             </section>
 
             <!-- =================================================================
@@ -2082,63 +2705,80 @@
                 <article id="invitation-sheet" class="editorial-sheet invitation-sheet">
                     <div class="invitation-stage">
                         <div class="invitation-content">
-                            <p class="invite-line">Together with their families,</p>
-                            <h2 class="invite-names">
-                                Manna <span class="invite-amp">&amp;</span> John
-                            </h2>
-                            <p class="invite-line">
-                                joyfully invite you to celebrate<br>
-                                their union in Holy Matrimony
-                            </p>
+                            <div class="invitation-header-block">
+                                <p class="invite-line">Together with their families,</p>
 
-                            <div class="lotus-divider" aria-hidden="true">
-                                <span></span>
-                                <svg width="54" height="22" viewBox="0 0 54 22" fill="none">
-                                    <path d="M27 3 C23 9, 23 15, 27 19 C31 15, 31 9, 27 3 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
-                                    <path d="M21 7 C16 10, 15 15, 19 18 C22 16, 23 11, 21 7 Z" fill="var(--bg-surface)" stroke="var(--kasavu-gold)" stroke-width="1.1"/>
-                                    <path d="M33 7 C38 10, 39 15, 35 18 C32 16, 31 11, 33 7 Z" fill="var(--bg-surface)" stroke="var(--kasavu-gold)" stroke-width="1.1"/>
-                                    <circle cx="11" cy="14" r="2" fill="var(--kasavu-gold)"/>
-                                    <circle cx="43" cy="14" r="2" fill="var(--kasavu-gold)"/>
-                                </svg>
-                                <span></span>
+                                <div class="invite-names-morph">
+                                    <div class="invite-names-full-wrap">
+                                        <div class="invite-names-full-inner">
+                                            <h2 class="invite-names invite-names-full">
+                                                <span>Manna Ann Mariyam</span>
+                                                <span class="invite-amp">&amp;</span>
+                                                <span>John Koodarathil Varkey</span>
+                                            </h2>
+                                        </div>
+                                    </div>
+                                    <h2 class="invite-names invite-names-short" aria-hidden="true">
+                                        Manna <span class="invite-amp">&amp;</span> John
+                                    </h2>
+                                </div>
+
+                                <p class="invite-line">
+                                    joyfully invite you to celebrate<br>
+                                    their union in Holy Matrimony
+                                </p>
                             </div>
 
-                            <!-- Styled Wedding Date & Time Only -->
-                            <div class="wedding-datetime-card">
-                                <span class="wedding-dt-eyebrow">The Wedding Day</span>
-                                <div class="wedding-dt-lockup">
-                                    <span class="wedding-dt-side">Monday</span>
-                                    <span class="wedding-dt-center">
-                                        <small>July</small>
-                                        <strong>12</strong>
-                                    </span>
-                                    <span class="wedding-dt-side">2027</span>
+                            <div class="invitation-details-reveal">
+                                <div class="lotus-divider" aria-hidden="true">
+                                    <span></span>
+                                    <svg width="54" height="22" viewBox="0 0 54 22" fill="none">
+                                        <path d="M27 3 C23 9, 23 15, 27 19 C31 15, 31 9, 27 3 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
+                                        <path d="M21 7 C16 10, 15 15, 19 18 C22 16, 23 11, 21 7 Z" fill="var(--bg-surface)" stroke="var(--kasavu-gold)" stroke-width="1.1"/>
+                                        <path d="M33 7 C38 10, 39 15, 35 18 C32 16, 31 11, 33 7 Z" fill="var(--bg-surface)" stroke="var(--kasavu-gold)" stroke-width="1.1"/>
+                                        <circle cx="11" cy="14" r="2" fill="var(--kasavu-gold)"/>
+                                        <circle cx="43" cy="14" r="2" fill="var(--kasavu-gold)"/>
+                                    </svg>
+                                    <span></span>
                                 </div>
-                                <div class="wedding-dt-times">
-                                    <span><strong>10:30 AM</strong> • Holy Matrimony</span>
-                                    <span class="dot-sep" aria-hidden="true">✦</span>
-                                    <span><strong>12:30 PM</strong> • Reception &amp; Feast</span>
-                                </div>
-                            </div>
 
-                            <div class="countdown-card" style="margin-top: 16px;">
-                                <span class="countdown-title">Countdown to the Wedding • July 12, 2027</span>
-                                <div class="countdown-cells">
-                                    <div class="countdown-cell">
-                                        <span id="cd-days" class="countdown-num">--</span>
-                                        <span class="countdown-unit">Days</span>
+                                <!-- Styled Wedding Date & Time Only -->
+                                <div class="wedding-datetime-card">
+                                    <span class="wedding-dt-eyebrow">The Wedding Day</span>
+                                    <div class="wedding-dt-lockup">
+                                        <span class="wedding-dt-side">Monday</span>
+                                        <span class="wedding-dt-center">
+                                            <small>July</small>
+                                            <strong>12</strong>
+                                        </span>
+                                        <span class="wedding-dt-side">2027</span>
                                     </div>
-                                    <div class="countdown-cell">
-                                        <span id="cd-hours" class="countdown-num">--</span>
-                                        <span class="countdown-unit">Hours</span>
+                                    <div class="wedding-dt-times">
+                                        <span><strong>10:30 AM</strong> • Holy Matrimony</span>
+                                        <span class="dot-sep" aria-hidden="true">✦</span>
+                                        <span><strong>12:30 PM</strong> • Reception &amp; Feast</span>
                                     </div>
-                                    <div class="countdown-cell">
-                                        <span id="cd-mins" class="countdown-num">--</span>
-                                        <span class="countdown-unit">Mins</span>
-                                    </div>
-                                    <div class="countdown-cell">
-                                        <span id="cd-secs" class="countdown-num">--</span>
-                                        <span class="countdown-unit">Secs</span>
+                                </div>
+
+                                <div class="countdown-card" style="margin-top: 16px;">
+                                    <span class="countdown-title">Countdown to the Wedding • July 12, 2027</span>
+                                    <div class="countdown-cells">
+                                        <div class="countdown-cell">
+                                            <span id="cd-days" class="countdown-num">--</span>
+                                            <span class="countdown-unit">Days</span>
+                                        </div>
+                                        <div class="countdown-cell">
+                                            <span id="cd-hours" class="countdown-num">--</span>
+                                            <span class="countdown-unit">Hours</span>
+                                        </div>
+                                        <div class="countdown-cell">
+                                            <span id="cd-mins" class="countdown-num">--</span>
+                                            <span class="countdown-unit">Mins</span>
+                                        </div>
+                                        <div class="countdown-cell">
+                                            <span id="cd-secs" class="countdown-num">--</span>
+                                            <span class="countdown-unit">Secs</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2151,7 +2791,7 @@
                                 “And now these three remain: faith, hope and love. But the greatest of these is love.”
                             </blockquote>
                             <cite class="scripture-ref">— 1 Corinthians 13:13</cite>
-                            <span class="scripture-hint">Tap to reveal • Hold to pause</span>
+                            <span class="scripture-hint">Tap or scroll to reveal • Hold to pause</span>
                         </div>
                     </div>
                 </article>
@@ -2504,10 +3144,89 @@
                         <!-- Album Colophon Footer -->
                         <footer class="album-colophon">
                             <p class="colophon-line">M &amp; J • July 12, 2027 • Kerala</p>
-                            <a href="#cover" class="next-chapter-link">↑ Back to Cover</a>
+                            <a href="#farewell" class="next-chapter-link">Continue ↓</a>
                         </footer>
                     </div>
                 </article>
+            </section>
+
+            <!-- =================================================================
+                 FINAL FAREWELL CARD -> FOLDS INTO ORIGAMI BIRD & FLIES AWAY (#farewell)
+                 ================================================================= -->
+            <section id="farewell" class="album-chapter farewell-chapter">
+                <article id="farewell-sheet" class="editorial-sheet farewell-sheet">
+                    <svg class="origami-creases" viewBox="0 0 820 420" preserveAspectRatio="none" aria-hidden="true">
+                        <line x1="0" y1="0" x2="820" y2="420" stroke="var(--kasavu-gold)" stroke-width="1" stroke-dasharray="6 6"/>
+                        <line x1="820" y1="0" x2="0" y2="420" stroke="var(--kasavu-gold)" stroke-width="1" stroke-dasharray="6 6"/>
+                        <line x1="410" y1="0" x2="410" y2="420" stroke="var(--accent-soft-55)" stroke-width="1" stroke-dasharray="5 5"/>
+                        <line x1="0" y1="210" x2="820" y2="210" stroke="var(--accent-soft-40)" stroke-width="1" stroke-dasharray="5 5"/>
+                    </svg>
+                    <div class="farewell-card-copy">
+                        <span class="chapter-eyebrow" style="margin-bottom: 10px;">With Love &amp; Gratitude</span>
+                        <h2 id="farewell-title" class="farewell-title">Thank You</h2>
+                        <p id="farewell-copy" class="farewell-copy">
+                            We are truly looking forward to celebrating with you in Kerala.
+                        </p>
+                        <div class="lotus-divider" aria-hidden="true">
+                            <span></span>
+                            <svg width="54" height="22" viewBox="0 0 54 22" fill="none">
+                                <path d="M27 3 C23 9, 23 15, 27 19 C31 15, 31 9, 27 3 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
+                                <path d="M21 7 C16 10, 15 15, 19 18 C22 16, 23 11, 21 7 Z" fill="var(--bg-surface)" stroke="var(--kasavu-gold)" stroke-width="1.1"/>
+                                <path d="M33 7 C38 10, 39 15, 35 18 C32 16, 31 11, 33 7 Z" fill="var(--bg-surface)" stroke="var(--kasavu-gold)" stroke-width="1.1"/>
+                                <circle cx="11" cy="14" r="2" fill="var(--kasavu-gold)"/>
+                                <circle cx="43" cy="14" r="2" fill="var(--kasavu-gold)"/>
+                            </svg>
+                            <span></span>
+                        </div>
+                        <span class="farewell-signoff">Manna &amp; John • July 12, 2027</span>
+                    </div>
+                </article>
+
+                <!-- Serene Post-Flight Keepsake Note -->
+                <div id="farewell-after" class="farewell-after">
+                    <span class="scripture-ornament" style="display: block; margin-bottom: 8px;" aria-hidden="true">✦</span>
+                    <h2 id="post-flight-title" class="farewell-title" style="font-size: clamp(1.55rem, 3.4vw, 2.05rem); margin-bottom: 8px;">
+                        Looking Forward to Celebrating With You
+                    </h2>
+                    <p id="post-flight-copy" class="farewell-copy" style="margin-bottom: 0;">
+                        Manna &amp; John • July 12, 2027 • Kerala
+                    </p>
+                    <div class="farewell-after-actions">
+                        <button type="button" class="farewell-replay-btn" onclick="replayFarewellOrigami()">
+                            ↻ Replay
+                        </button>
+                        <a href="#cover" class="next-chapter-link">↑ Back to Cover</a>
+                    </div>
+                </div>
+
+                <!-- Origami Bird Flight Layer -->
+                <div id="origami-flight-layer" class="origami-flight-layer" aria-hidden="true">
+                    <div id="origami-bird-anchor" class="origami-bird-anchor">
+                        <div class="origami-bird-mover">
+                            <span class="origami-sparkle s1" style="left: 16px; top: 56px;"></span>
+                            <span class="origami-sparkle s2" style="left: 26px; top: 64px;"></span>
+                            <span class="origami-sparkle s3" style="left: 10px; top: 48px;"></span>
+                            <svg class="origami-bird-svg" viewBox="0 0 120 100" fill="none">
+                                <!-- Back Wing -->
+                                <g class="origami-wing-back">
+                                    <polygon points="48,54 34,14 74,46" fill="var(--bg-linen)" stroke="var(--kasavu-gold)" stroke-width="1.2" stroke-linejoin="round"/>
+                                </g>
+                                <!-- Tail -->
+                                <polygon points="10,62 48,54 34,70" fill="var(--bg-linen)" stroke="var(--kasavu-gold)" stroke-width="1.2" stroke-linejoin="round"/>
+                                <!-- Body Facets -->
+                                <polygon points="34,70 48,54 84,50 62,72" fill="var(--bg-surface)" stroke="var(--kasavu-gold)" stroke-width="1.2" stroke-linejoin="round"/>
+                                <!-- Neck & Head -->
+                                <polygon points="68,52 84,50 98,24 90,50" fill="var(--bg-cotton)" stroke="var(--kasavu-gold)" stroke-width="1.2" stroke-linejoin="round"/>
+                                <polygon points="98,24 114,29 94,35" fill="var(--kasavu-gold)" stroke="var(--kasavu-gold-deep)" stroke-width="1" stroke-linejoin="round"/>
+                                <!-- Front Wing -->
+                                <g class="origami-wing-front">
+                                    <polygon points="44,58 64,10 82,50" fill="var(--bg-cotton)" stroke="var(--kasavu-gold)" stroke-width="1.35" stroke-linejoin="round"/>
+                                    <polygon points="64,10 82,50 62,56" fill="var(--kasavu-gold-tint)" stroke="var(--kasavu-gold)" stroke-width="0.9" stroke-linejoin="round"/>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
             </section>
 
         </main>
@@ -2598,11 +3317,14 @@
             }
         }
 
-        // 2. 4-Sided Viewport Border Scroll Progress (starts with top complete) & Chapter Reveal
-        function updateScrollProgress() {
-            var docEl = document.documentElement;
-            var scrollable = docEl.scrollHeight - docEl.clientHeight;
-            var ratio = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 1;
+        // 2. 4-Sided Viewport Border Progress (driven by active card, no downward scroll)
+        var activeSlideIndex = 0;
+
+        function updateScrollProgress(slideIdx) {
+            var slides = document.querySelectorAll('.album-chapter');
+            var total = slides.length;
+            var idx = typeof slideIdx === 'number' ? slideIdx : activeSlideIndex;
+            var ratio = total > 1 ? Math.min(1, Math.max(0, idx / (total - 1))) : 1;
 
             var seg = 1 / 3;
             var rightPct = Math.min(100, Math.max(0, (ratio / seg) * 100));
@@ -2620,34 +3342,6 @@
             if (elBottom) elBottom.style.width = bottomPct.toFixed(2) + '%';
             if (elLeft) elLeft.style.height = leftPct.toFixed(2) + '%';
             if (frame) frame.classList.toggle('is-complete', ratio >= 0.995);
-
-            var chapters = document.querySelectorAll('.album-chapter');
-            chapters.forEach(function(chap) {
-                if (window.scrollY + window.innerHeight * 0.92 >= chap.offsetTop) {
-                    chap.classList.add('is-shown');
-                }
-            });
-        }
-
-        function observeChapters() {
-            var chapters = document.querySelectorAll('.album-chapter');
-            if ('IntersectionObserver' in window) {
-                var obs = new IntersectionObserver(function(entries) {
-                    entries.forEach(function(entry) {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('is-shown');
-                        }
-                    });
-                }, { threshold: 0.08 });
-
-                chapters.forEach(function(chap) {
-                    obs.observe(chap);
-                });
-            } else {
-                chapters.forEach(function(chap) {
-                    chap.classList.add('is-shown');
-                });
-            }
         }
 
         // 3. Repeating Route Animation (~6.5s total cycle: ~1.8s flights + ~1.7s car + ~1.0s join into red heart + ~2.0s heart hold)
@@ -2663,7 +3357,13 @@
             if (trivandrum) trivandrum.classList.toggle('is-active-stop', stopName === 'trivandrum');
         }
 
+        var routeStartTimer = null;
+
         function clearRouteTimers() {
+            if (routeStartTimer) {
+                clearTimeout(routeStartTimer);
+                routeStartTimer = null;
+            }
             if (routeRafId) {
                 cancelAnimationFrame(routeRafId);
                 routeRafId = null;
@@ -2810,25 +3510,17 @@
             routeRafId = requestAnimationFrame(frame);
         }
 
-        function setupRouteTrigger() {
-            var sheet = document.getElementById('story-sheet');
-            if (!sheet) return;
-
-            if ('IntersectionObserver' in window) {
-                var observer = new IntersectionObserver(function(entries) {
-                    entries.forEach(function(entry) {
-                        if (entry.isIntersecting && !routeInitialized) {
-                            routeInitialized = true;
-                            runStoryRouteCycle();
-                        }
-                    });
-                }, { threshold: 0.12 });
-
-                observer.observe(sheet);
-            } else {
-                routeInitialized = true;
+        function startStoryRoute(delayMs) {
+            clearRouteTimers();
+            routeStartTimer = setTimeout(function() {
+                routeStartTimer = null;
                 runStoryRouteCycle();
-            }
+            }, typeof delayMs === 'number' ? delayMs : 360);
+        }
+
+        function stopStoryRoute() {
+            clearRouteTimers();
+            routeCycleToken += 1;
         }
 
         // 4. Live Countdown to the Wedding (Monday, July 12, 2027)
@@ -2852,7 +3544,117 @@
             if (elSecs) elSecs.textContent = String(secs).padStart(2, '0');
         }
 
-        // 5. Interactive Keepsake RSVP Confirmation
+        // 5. Interactive Keepsake RSVP Confirmation & Final Farewell Origami Card
+        var farewellTimers = [];
+        var rsvpGuestName = '';
+        var rsvpGuestAttending = true;
+
+        function clearFarewellTimers() {
+            while (farewellTimers.length) {
+                clearTimeout(farewellTimers.pop());
+            }
+        }
+
+        function syncFarewellCopy() {
+            var farewellTitle = document.getElementById('farewell-title');
+            var farewellCopy = document.getElementById('farewell-copy');
+            var postFlightTitle = document.getElementById('post-flight-title');
+            var postFlightCopy = document.getElementById('post-flight-copy');
+
+            if (farewellTitle) {
+                farewellTitle.textContent = rsvpGuestName ? ('Thank You, ' + rsvpGuestName) : 'Thank You';
+            }
+            if (farewellCopy) {
+                farewellCopy.textContent = rsvpGuestAttending
+                    ? 'We are truly looking forward to celebrating with you in Kerala.'
+                    : 'We carry your warm wishes with us as we begin our life together.';
+            }
+            if (postFlightTitle) {
+                postFlightTitle.textContent = rsvpGuestAttending
+                    ? 'Looking Forward to Celebrating With You'
+                    : 'Thank You for Your Warm Wishes';
+            }
+            if (postFlightCopy) {
+                postFlightCopy.textContent = 'Manna & John • July 12, 2027 • Kerala';
+            }
+        }
+
+        function resetFarewellStage() {
+            clearFarewellTimers();
+            var farewell = document.getElementById('farewell');
+            var flightLayer = document.getElementById('origami-flight-layer');
+            if (farewell) {
+                farewell.classList.remove('is-folding', 'is-flown', 'is-post-visible');
+            }
+            if (flightLayer) {
+                flightLayer.classList.remove('is-active', 'is-folding', 'is-flying');
+            }
+            syncFarewellCopy();
+        }
+
+        function startFarewellOrigamiSequence(initialDelayMs) {
+            resetFarewellStage();
+
+            var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (reducedMotion) return;
+
+            var farewell = document.getElementById('farewell');
+            var farewellSheet = document.getElementById('farewell-sheet');
+            var flightLayer = document.getElementById('origami-flight-layer');
+            var birdAnchor = document.getElementById('origami-bird-anchor');
+            if (!farewell || !farewellSheet || !flightLayer) return;
+
+            var holdDelay = typeof initialDelayMs === 'number' ? initialDelayMs : 2300;
+
+            // Phase 1: Fold the entire farewell card into the origami bird
+            farewellTimers.push(setTimeout(function() {
+                if (!farewell.classList.contains('is-active')) return;
+                if (birdAnchor) {
+                    var rect = farewellSheet.getBoundingClientRect();
+                    birdAnchor.style.left = Math.round(rect.left + rect.width * 0.5) + 'px';
+                    birdAnchor.style.top = Math.round(rect.top + rect.height * 0.5) + 'px';
+                }
+                flightLayer.classList.add('is-active');
+                requestAnimationFrame(function() {
+                    farewell.classList.add('is-folding');
+                    flightLayer.classList.add('is-folding');
+                });
+
+                // Phase 2: Wings flap & origami bird flies away
+                farewellTimers.push(setTimeout(function() {
+                    if (!farewell.classList.contains('is-active')) return;
+                    flightLayer.classList.add('is-flying');
+
+                    // Phase 3: Reveal serene post-flight keepsake note
+                    farewellTimers.push(setTimeout(function() {
+                        if (!farewell.classList.contains('is-active')) return;
+                        farewell.classList.add('is-flown');
+                        requestAnimationFrame(function() {
+                            farewell.classList.add('is-post-visible');
+                        });
+                    }, 1350));
+
+                    // Clean up flight layer once bird exits sky
+                    farewellTimers.push(setTimeout(function() {
+                        flightLayer.classList.remove('is-active', 'is-folding', 'is-flying');
+                    }, 2250));
+                }, 740));
+            }, holdDelay));
+        }
+
+        function replayFarewellOrigami() {
+            var farewell = document.getElementById('farewell');
+            if (!farewell) return;
+            resetFarewellStage();
+            farewell.classList.remove('is-shown');
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    farewell.classList.add('is-shown');
+                    startFarewellOrigamiSequence(1900);
+                });
+            });
+        }
+
         function handleRsvpSubmit(event) {
             event.preventDefault();
             var name = document.getElementById('rsvp-name').value.trim();
@@ -2861,6 +3663,10 @@
             var notes = document.getElementById('rsvp-notes').value.trim();
 
             if (!name) return;
+
+            rsvpGuestName = name;
+            rsvpGuestAttending = attendance.indexOf('Wedding') !== -1;
+            syncFarewellCopy();
 
             var message =
                 'Dearest <strong>' + escapeHtml(name) + '</strong>, we have joyfully recorded your reply for <strong>' +
@@ -2978,11 +3784,16 @@
             });
         }
 
-        var VERSE_READ_DELAY_MS = 4800;
+        var VERSE_READ_DELAY_MS = 4500;
+        var DETAILS_READ_DELAY_MS = 2200;
         var invitationTimer = null;
         var invitationTimerStartedAt = 0;
         var invitationRemainingMs = VERSE_READ_DELAY_MS;
         var invitationRevealed = false;
+        var invitationDetailsTimer = null;
+        var invitationDetailsStartedAt = 0;
+        var invitationDetailsRemainingMs = DETAILS_READ_DELAY_MS;
+        var invitationDetailsShown = false;
         var invitationHolding = false;
         var slideMotionBusy = false;
 
@@ -2996,6 +3807,27 @@
             if (typeof minRemainingMs === 'number' && !invitationRevealed) {
                 invitationRemainingMs = Math.max(invitationRemainingMs, minRemainingMs);
             }
+            if (invitationDetailsTimer) {
+                clearTimeout(invitationDetailsTimer);
+                invitationDetailsTimer = null;
+                var detailsElapsed = Date.now() - invitationDetailsStartedAt;
+                invitationDetailsRemainingMs = Math.max(0, invitationDetailsRemainingMs - detailsElapsed);
+            }
+        }
+
+        function showInvitationDetailsNow() {
+            var sheet = document.getElementById('invitation-sheet');
+            if (!sheet || invitationDetailsShown) return;
+            invitationDetailsShown = true;
+            if (invitationDetailsTimer) {
+                clearTimeout(invitationDetailsTimer);
+                invitationDetailsTimer = null;
+            }
+            sheet.classList.add('is-details-shown');
+            var fullEl = sheet.querySelector('.invite-names-full');
+            var shortEl = sheet.querySelector('.invite-names-short');
+            if (fullEl) fullEl.setAttribute('aria-hidden', 'true');
+            if (shortEl) shortEl.setAttribute('aria-hidden', 'false');
         }
 
         function revealInvitationNow() {
@@ -3008,36 +3840,47 @@
                 invitationTimer = null;
             }
             sheet.classList.add('is-unblurred');
+            syncInvitationTimer();
         }
 
         function syncInvitationTimer() {
             var sheet = document.getElementById('invitation-sheet');
-            if (!sheet || invitationRevealed) return;
+            if (!sheet) return;
 
-            var rect = sheet.getBoundingClientRect();
-            var vh = window.innerHeight || document.documentElement.clientHeight || 0;
-            var visiblePx = Math.max(0, Math.min(vh, rect.bottom) - Math.max(0, rect.top));
-            var fracSheet = rect.height > 0 ? visiblePx / rect.height : 0;
-            var fracVh = vh > 0 ? visiblePx / vh : 0;
-            var inMainView = !document.hidden && visiblePx > 0 && (fracSheet >= 0.55 || fracVh >= 0.55);
-            var clearlyLeftView = visiblePx <= 0 || (fracSheet < 0.35 && fracVh < 0.35);
+            if (invitationRevealed && invitationDetailsShown) return;
 
-            if (clearlyLeftView) {
+            var chapter = sheet.closest('.album-chapter');
+            var inMainView = !document.hidden && chapter && chapter.classList.contains('is-active');
+
+            if (!inMainView) {
                 pauseInvitationTimer();
-                invitationRemainingMs = VERSE_READ_DELAY_MS;
+                if (!invitationRevealed) {
+                    invitationRemainingMs = VERSE_READ_DELAY_MS;
+                } else if (!invitationDetailsShown) {
+                    invitationDetailsRemainingMs = DETAILS_READ_DELAY_MS;
+                }
                 return;
             }
 
-            if (!inMainView || slideMotionBusy || invitationHolding) {
+            if (slideMotionBusy || invitationHolding) {
                 pauseInvitationTimer();
                 return;
             }
 
-            if (!invitationTimer) {
-                invitationTimerStartedAt = Date.now();
-                invitationTimer = setTimeout(function() {
-                    revealInvitationNow();
-                }, invitationRemainingMs);
+            if (!invitationRevealed) {
+                if (!invitationTimer) {
+                    invitationTimerStartedAt = Date.now();
+                    invitationTimer = setTimeout(function() {
+                        revealInvitationNow();
+                    }, invitationRemainingMs);
+                }
+            } else if (!invitationDetailsShown) {
+                if (!invitationDetailsTimer) {
+                    invitationDetailsStartedAt = Date.now();
+                    invitationDetailsTimer = setTimeout(function() {
+                        showInvitationDetailsNow();
+                    }, invitationDetailsRemainingMs);
+                }
             }
         }
 
@@ -3049,6 +3892,15 @@
         function setupInvitationTrigger() {
             var sheet = document.getElementById('invitation-sheet');
             if (!sheet) return;
+
+            var content = sheet.querySelector('.invitation-content');
+            if (content) {
+                content.addEventListener('click', function() {
+                    if (invitationRevealed && !invitationDetailsShown) {
+                        showInvitationDetailsNow();
+                    }
+                });
+            }
 
             var veil = sheet.querySelector('.scripture-veil');
             if (veil) {
@@ -3113,51 +3965,26 @@
                 });
             }
 
-            if ('IntersectionObserver' in window) {
-                var obs = new IntersectionObserver(function() {
-                    syncInvitationTimer();
-                }, { threshold: [0, 0.25, 0.4, 0.55, 0.75] });
-
-                obs.observe(sheet);
-                window.addEventListener('scroll', syncInvitationTimer, { passive: true });
-                document.addEventListener('visibilitychange', syncInvitationTimer);
-                syncInvitationTimer();
-            } else {
-                revealInvitationNow();
-            }
+            document.addEventListener('visibilitychange', syncInvitationTimer);
+            syncInvitationTimer();
         }
 
-        function setupScheduleTrigger() {
-            var sheet = document.getElementById('schedule-sheet');
-            if (!sheet) return;
-
-            if ('IntersectionObserver' in window) {
-                var obs = new IntersectionObserver(function(entries) {
-                    entries.forEach(function(entry) {
-                        if (entry.isIntersecting) {
-                            sheet.classList.add('is-timeline-active');
-                            obs.unobserve(sheet);
-                        }
-                    });
-                }, { threshold: 0.16 });
-
-                obs.observe(sheet);
-            } else {
-                sheet.classList.add('is-timeline-active');
-            }
-        }
-
-        // 7. Full-Viewport Auto-Scroll Slide Controller (1 card per screen)
-        function setupSlideScroll() {
+        // 7. In-Place Card Deck Controller (No Downward Scroll) + Album Opening Sequence
+        function setupDeckNavigation() {
             var slides = Array.prototype.slice.call(document.querySelectorAll('.album-chapter'));
             if (!slides.length) return;
 
-            var scrollAnimId = null;
-            var isAutoScrolling = false;
+            var coverEl = document.getElementById('cover');
+            var isTransitioning = false;
+            var isAlbumOpening = false;
+            var isAlbumOpen = false;
+            var albumOpenTimer = null;
+            var albumCloseTimer = null;
+            var settleDoneTimer = null;
+            var leaveTimers = {};
             var wheelLockUntil = 0;
             var wheelAccum = 0;
             var wheelResetTimer = null;
-            var settleTimer = null;
             var touchStartY = 0;
             var touchStartIdx = 0;
             var isTouching = false;
@@ -3166,83 +3993,223 @@
                 return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             }
 
-            function getCurrentSlideIndex() {
-                var midY = window.scrollY + window.innerHeight * 0.5;
-                var bestIdx = 0;
-                var bestDist = Infinity;
+            function clearLeaveTimer(idx) {
+                if (leaveTimers[idx]) {
+                    clearTimeout(leaveTimers[idx]);
+                    delete leaveTimers[idx];
+                }
+            }
 
-                for (var i = 0; i < slides.length; i++) {
-                    var top = slides[i].offsetTop;
-                    var center = top + slides[i].offsetHeight * 0.5;
-                    var dist = Math.abs(midY - center);
-                    if (dist < bestDist) {
-                        bestDist = dist;
-                        bestIdx = i;
+            function activateImmediate(idx) {
+                slides.forEach(function(slide, i) {
+                    clearLeaveTimer(i);
+                    slide.classList.remove('is-leaving');
+                    if (i === idx) {
+                        slide.classList.add('is-active', 'is-shown');
+                    } else {
+                        slide.classList.remove('is-active', 'is-shown');
                     }
+                });
+                activeSlideIndex = idx;
+                updateScrollProgress(idx);
+                if (slides[idx] && slides[idx].id === 'schedule') {
+                    var sched = document.getElementById('schedule-sheet');
+                    if (sched) sched.classList.add('is-timeline-active');
                 }
-                return bestIdx;
+                if (slides[idx] && slides[idx].id === 'story') {
+                    startStoryRoute(120);
+                } else {
+                    stopStoryRoute();
+                }
+                if (slides[idx] && slides[idx].id === 'farewell') {
+                    resetFarewellStage();
+                } else {
+                    clearFarewellTimers();
+                }
+                syncInvitationTimer();
             }
 
-            function getSlideTargetY(idx, alignBottom) {
-                var slide = slides[idx];
-                var vh = window.innerHeight;
-                var sh = slide.offsetHeight;
-                if (alignBottom && sh > vh + 10) {
-                    return Math.max(0, slide.offsetTop + sh - vh);
-                }
-                return slide.offsetTop;
-            }
+            function transitionBetweenSlides(fromIdx, toIdx, scrollToBottom) {
+                if (fromIdx === toIdx) return;
 
-            function animateScrollTo(targetY) {
-                if (scrollAnimId) {
-                    cancelAnimationFrame(scrollAnimId);
-                    scrollAnimId = null;
-                }
+                var fromSlide = slides[fromIdx];
+                var toSlide = slides[toIdx];
+                if (!toSlide) return;
 
-                var startY = window.scrollY;
-                var diff = targetY - startY;
-                if (Math.abs(diff) < 2 || prefersReducedMotion()) {
-                    window.scrollTo(0, targetY);
-                    updateScrollProgress();
-                    isAutoScrolling = false;
+                if (prefersReducedMotion()) {
+                    activateImmediate(toIdx);
+                    isTransitioning = false;
                     setSlideMotionBusy(isTouching);
                     return;
                 }
 
-                isAutoScrolling = true;
-                setSlideMotionBusy(true);
-                var duration = 640;
-                var startTime = null;
-
-                function easeInOutCubic(t) {
-                    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                clearLeaveTimer(fromIdx);
+                clearLeaveTimer(toIdx);
+                if (settleDoneTimer) {
+                    clearTimeout(settleDoneTimer);
+                    settleDoneTimer = null;
                 }
 
-                function step(now) {
-                    if (!startTime) startTime = now;
-                    var elapsed = now - startTime;
-                    var progress = Math.min(1, elapsed / duration);
-                    var eased = easeInOutCubic(progress);
-                    window.scrollTo(0, startY + diff * eased);
-                    updateScrollProgress();
+                isTransitioning = true;
+                setSlideMotionBusy(true);
 
-                    if (progress < 1) {
-                        scrollAnimId = requestAnimationFrame(step);
-                    } else {
-                        scrollAnimId = null;
-                        isAutoScrolling = false;
-                        setSlideMotionBusy(isTouching);
+                if (fromSlide) {
+                    fromSlide.classList.remove('is-active', 'is-shown');
+                    fromSlide.classList.add('is-leaving');
+                    if (fromSlide.id === 'story') {
+                        stopStoryRoute();
+                    }
+                    if (fromSlide.id === 'farewell') {
+                        clearFarewellTimers();
+                        var fl = document.getElementById('origami-flight-layer');
+                        if (fl) fl.classList.remove('is-active', 'is-folding', 'is-flying');
+                    }
+                    leaveTimers[fromIdx] = setTimeout(function() {
+                        delete leaveTimers[fromIdx];
+                        fromSlide.classList.remove('is-leaving');
+                        if (fromSlide.id === 'schedule') {
+                            var schedOut = document.getElementById('schedule-sheet');
+                            if (schedOut) schedOut.classList.remove('is-timeline-active');
+                        }
+                        if (fromSlide.id === 'farewell') {
+                            resetFarewellStage();
+                        }
+                    }, fromSlide.id === 'cover' ? 340 : 280);
+                }
+
+                if (toSlide.id === 'farewell') {
+                    resetFarewellStage();
+                }
+
+                toSlide.classList.remove('is-leaving', 'is-shown');
+                toSlide.classList.add('is-active');
+                toSlide.scrollTop = scrollToBottom ? toSlide.scrollHeight : 0;
+
+                activeSlideIndex = toIdx;
+                updateScrollProgress(toIdx);
+                syncInvitationTimer();
+
+                requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                        if (activeSlideIndex !== toIdx) return;
+                        toSlide.classList.add('is-shown');
+                        if (toSlide.id === 'schedule') {
+                            var schedIn = document.getElementById('schedule-sheet');
+                            if (schedIn) schedIn.classList.add('is-timeline-active');
+                        }
+                        if (toSlide.id === 'story') {
+                            startStoryRoute(260);
+                        }
+                        if (toSlide.id === 'farewell') {
+                            startFarewellOrigamiSequence(2300);
+                        }
+                    });
+                });
+
+                settleDoneTimer = setTimeout(function() {
+                    settleDoneTimer = null;
+                    isTransitioning = false;
+                    setSlideMotionBusy(isTouching);
+                }, 600);
+            }
+
+            function closeAlbumCover(delayMs) {
+                if (albumOpenTimer) {
+                    clearTimeout(albumOpenTimer);
+                    albumOpenTimer = null;
+                }
+                if (albumCloseTimer) {
+                    clearTimeout(albumCloseTimer);
+                    albumCloseTimer = null;
+                }
+                isAlbumOpening = false;
+                isAlbumOpen = false;
+                if (!coverEl) return;
+
+                if (!delayMs || prefersReducedMotion()) {
+                    coverEl.classList.remove('is-album-opening', 'is-album-open');
+                } else {
+                    albumCloseTimer = setTimeout(function() {
+                        albumCloseTimer = null;
+                        if (coverEl) {
+                            coverEl.classList.remove('is-album-opening', 'is-album-open');
+                        }
+                    }, delayMs);
+                }
+            }
+
+            function openAlbumToSlide(targetIdx) {
+                if (!coverEl || prefersReducedMotion()) {
+                    isAlbumOpen = true;
+                    wheelLockUntil = Date.now() + 650;
+                    wheelAccum = 0;
+                    transitionBetweenSlides(activeSlideIndex, targetIdx, false);
+                    return;
+                }
+
+                if (albumCloseTimer) {
+                    clearTimeout(albumCloseTimer);
+                    albumCloseTimer = null;
+                }
+                if (albumOpenTimer) {
+                    clearTimeout(albumOpenTimer);
+                    albumOpenTimer = null;
+                }
+
+                isAlbumOpening = true;
+                isTransitioning = true;
+                setSlideMotionBusy(true);
+                wheelLockUntil = Date.now() + 920;
+                wheelAccum = 0;
+
+                coverEl.classList.add('is-album-opening');
+
+                albumOpenTimer = setTimeout(function() {
+                    albumOpenTimer = null;
+                    if (coverEl) coverEl.classList.add('is-album-open');
+                    isAlbumOpening = false;
+                    isAlbumOpen = true;
+                    transitionBetweenSlides(0, targetIdx, false);
+                }, 260);
+            }
+
+            function goToSlide(idx, scrollToBottom) {
+                idx = Math.max(0, Math.min(slides.length - 1, idx));
+                if (idx === activeSlideIndex || isTransitioning || isAlbumOpening) return;
+
+                var currentSlide = slides[activeSlideIndex];
+                if (currentSlide && currentSlide.id === 'invitation' && idx > activeSlideIndex) {
+                    if (!invitationRevealed) {
+                        wheelLockUntil = Date.now() + 900;
+                        wheelAccum = 0;
+                        setSlideMotionBusy(false);
+                        revealInvitationNow();
+                        return;
+                    }
+                    if (!invitationDetailsShown) {
+                        wheelLockUntil = Date.now() + 950;
+                        wheelAccum = 0;
+                        setSlideMotionBusy(false);
+                        showInvitationDetailsNow();
+                        return;
                     }
                 }
 
-                scrollAnimId = requestAnimationFrame(step);
-            }
+                if (activeSlideIndex === 0 && idx > 0 && !isAlbumOpen) {
+                    openAlbumToSlide(idx);
+                    return;
+                }
 
-            function scrollToSlide(idx, alignBottom) {
-                idx = Math.max(0, Math.min(slides.length - 1, idx));
-                wheelLockUntil = Date.now() + 720;
+                wheelLockUntil = Date.now() + 640;
                 wheelAccum = 0;
-                animateScrollTo(getSlideTargetY(idx, alignBottom));
+
+                if (idx === 0) {
+                    transitionBetweenSlides(activeSlideIndex, 0, false);
+                    closeAlbumCover(90);
+                    return;
+                }
+
+                transitionBetweenSlides(activeSlideIndex, idx, scrollToBottom);
             }
 
             window.addEventListener('wheel', function(event) {
@@ -3253,20 +4220,19 @@
                     return;
                 }
 
-                if (isAutoScrolling || Date.now() < wheelLockUntil) {
+                if (isTransitioning || isAlbumOpening || Date.now() < wheelLockUntil) {
                     event.preventDefault();
                     return;
                 }
 
-                var idx = getCurrentSlideIndex();
-                var slide = slides[idx];
-                var rect = slide.getBoundingClientRect();
-                var vh = window.innerHeight;
-                var isTall = slide.offsetHeight > vh + 12;
+                var slide = slides[activeSlideIndex];
+                var isTall = slide && slide.scrollHeight > slide.clientHeight + 8;
 
                 if (isTall) {
-                    if (event.deltaY > 0 && rect.bottom > vh + 6) return;
-                    if (event.deltaY < 0 && rect.top < -6) return;
+                    var atBottom = slide.scrollTop + slide.clientHeight >= slide.scrollHeight - 4;
+                    var atTop = slide.scrollTop <= 4;
+                    if (event.deltaY > 0 && !atBottom) return;
+                    if (event.deltaY < 0 && !atTop) return;
                 }
 
                 event.preventDefault();
@@ -3275,101 +4241,108 @@
                 if (wheelResetTimer) clearTimeout(wheelResetTimer);
                 wheelResetTimer = setTimeout(function() { wheelAccum = 0; }, 120);
 
-                if (wheelAccum >= 18 && idx < slides.length - 1) {
-                    scrollToSlide(idx + 1, false);
-                } else if (wheelAccum <= -18 && idx > 0) {
-                    scrollToSlide(idx - 1, true);
+                if (wheelAccum >= 18 && activeSlideIndex < slides.length - 1) {
+                    goToSlide(activeSlideIndex + 1, false);
+                } else if (wheelAccum <= -18 && activeSlideIndex > 0) {
+                    goToSlide(activeSlideIndex - 1, true);
                 }
             }, { passive: false });
 
             window.addEventListener('touchstart', function(event) {
-                if (event.touches.length !== 1) return;
+                if (event.touches.length !== 1 || isAlbumOpening || isTransitioning) return;
                 isTouching = true;
                 setSlideMotionBusy(true);
-                if (settleTimer) clearTimeout(settleTimer);
                 touchStartY = event.touches[0].clientY;
-                touchStartIdx = getCurrentSlideIndex();
+                touchStartIdx = activeSlideIndex;
             }, { passive: true });
+
+            window.addEventListener('touchmove', function(event) {
+                if (!isTouching || event.touches.length !== 1) return;
+                var switcher = document.getElementById('palette-switcher');
+                if (switcher && switcher.classList.contains('is-open') && switcher.contains(event.target)) {
+                    return;
+                }
+                var slide = slides[touchStartIdx];
+                if (slide && slide.scrollHeight <= slide.clientHeight + 8) {
+                    event.preventDefault();
+                }
+            }, { passive: false });
 
             window.addEventListener('touchend', function(event) {
                 isTouching = false;
+                if (isAlbumOpening || isTransitioning) return;
                 if (!event.changedTouches.length) {
-                    setSlideMotionBusy(isAutoScrolling);
+                    setSlideMotionBusy(false);
                     return;
                 }
 
                 var switcher = document.getElementById('palette-switcher');
                 if (switcher && switcher.classList.contains('is-open') && switcher.contains(event.target)) {
-                    setSlideMotionBusy(isAutoScrolling);
+                    setSlideMotionBusy(false);
                     return;
                 }
 
                 var slide = slides[touchStartIdx];
-                var vh = window.innerHeight;
-                if (slide && slide.offsetHeight <= vh + 12) {
-                    var delta = touchStartY - event.changedTouches[0].clientY;
+                var delta = touchStartY - event.changedTouches[0].clientY;
+                var isTall = slide && slide.scrollHeight > slide.clientHeight + 8;
+
+                if (!isTall) {
                     if (delta > 36 && touchStartIdx < slides.length - 1) {
-                        scrollToSlide(touchStartIdx + 1, false);
+                        goToSlide(touchStartIdx + 1, false);
+                        return;
                     } else if (delta < -36 && touchStartIdx > 0) {
-                        scrollToSlide(touchStartIdx - 1, true);
-                    } else if (Math.abs(delta) > 6) {
-                        scrollToSlide(touchStartIdx, false);
-                    } else {
-                        setSlideMotionBusy(isAutoScrolling);
+                        goToSlide(touchStartIdx - 1, true);
+                        return;
                     }
                 } else {
-                    setSlideMotionBusy(isAutoScrolling);
+                    var atBottom = slide.scrollTop + slide.clientHeight >= slide.scrollHeight - 6;
+                    var atTop = slide.scrollTop <= 6;
+                    if (atBottom && delta > 44 && touchStartIdx < slides.length - 1) {
+                        goToSlide(touchStartIdx + 1, false);
+                        return;
+                    } else if (atTop && delta < -44 && touchStartIdx > 0) {
+                        goToSlide(touchStartIdx - 1, true);
+                        return;
+                    }
                 }
+
+                setSlideMotionBusy(false);
             }, { passive: true });
 
             window.addEventListener('touchcancel', function() {
                 isTouching = false;
-                setSlideMotionBusy(isAutoScrolling);
-            }, { passive: true });
-
-            window.addEventListener('scroll', function() {
-                if (isAutoScrolling || isTouching) return;
-                if (settleTimer) clearTimeout(settleTimer);
-                settleTimer = setTimeout(function() {
-                    if (isAutoScrolling || isTouching) return;
-                    var idx = getCurrentSlideIndex();
-                    var slide = slides[idx];
-                    if (slide && slide.offsetHeight <= window.innerHeight + 12) {
-                        if (Math.abs(window.scrollY - slide.offsetTop) > 4) {
-                            animateScrollTo(slide.offsetTop);
-                        }
-                    }
-                }, 150);
+                setSlideMotionBusy(isTransitioning || isAlbumOpening);
             }, { passive: true });
 
             window.addEventListener('keydown', function(event) {
                 var tag = event.target && event.target.tagName;
                 if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || tag === 'BUTTON' || tag === 'A') return;
+                if (isAlbumOpening || isTransitioning) {
+                    event.preventDefault();
+                    return;
+                }
 
-                var idx = getCurrentSlideIndex();
-                var slide = slides[idx];
-                var rect = slide.getBoundingClientRect();
-                var vh = window.innerHeight;
-                var isTall = slide.offsetHeight > vh + 12;
+                var slide = slides[activeSlideIndex];
+                var isTall = slide && slide.scrollHeight > slide.clientHeight + 8;
 
                 if (event.key === 'ArrowDown' || event.key === 'PageDown' || (event.key === ' ' && !event.shiftKey)) {
-                    if (isTall && rect.bottom > vh + 6) return;
-                    if (idx < slides.length - 1) {
+                    if (isTall && slide.scrollTop + slide.clientHeight < slide.scrollHeight - 4) return;
+                    if (activeSlideIndex < slides.length - 1) {
                         event.preventDefault();
-                        scrollToSlide(idx + 1, false);
+                        goToSlide(activeSlideIndex + 1, false);
                     }
                 } else if (event.key === 'ArrowUp' || event.key === 'PageUp' || (event.key === ' ' && event.shiftKey)) {
-                    if (isTall && rect.top < -6) return;
-                    if (idx > 0) {
+                    if (isTall && slide.scrollTop > 4) return;
+                    if (activeSlideIndex > 0) {
                         event.preventDefault();
-                        scrollToSlide(idx - 1, true);
+                        goToSlide(activeSlideIndex - 1, true);
                     }
                 } else if (event.key === 'Home') {
                     event.preventDefault();
-                    scrollToSlide(0, false);
+                    goToSlide(0, false);
                 } else if (event.key === 'End') {
                     event.preventDefault();
-                    scrollToSlide(slides.length - 1, false);
+                    goToSlide(slides.length - 1, false);
                 }
             });
 
@@ -3379,34 +4352,34 @@
                     var targetIdx = slides.findIndex(function(s) { return s.id === id; });
                     if (targetIdx !== -1) {
                         event.preventDefault();
-                        scrollToSlide(targetIdx, false);
+                        goToSlide(targetIdx, false);
                     }
                 });
             });
 
-            window.addEventListener('resize', function() {
-                if (isAutoScrolling) return;
-                var idx = getCurrentSlideIndex();
-                var slide = slides[idx];
-                if (slide && slide.offsetHeight <= window.innerHeight + 12) {
-                    window.scrollTo(0, slide.offsetTop);
-                    updateScrollProgress();
-                }
-            }, { passive: true });
+            activateImmediate(0);
+        }
+
+        function syncInvitationCenterOffset() {
+            var details = document.querySelector('#invitation-sheet .invitation-details-reveal');
+            var header = document.querySelector('#invitation-sheet .invitation-header-block');
+            if (details && header) {
+                header.style.setProperty('--invite-center-y', Math.round(details.offsetHeight * 0.5) + 'px');
+            }
         }
 
         window.addEventListener('DOMContentLoaded', function() {
             initPaletteSwitcher();
             createPetals();
-            observeChapters();
             setupInvitationTrigger();
-            setupRouteTrigger();
-            setupScheduleTrigger();
-            setupSlideScroll();
-            updateScrollProgress();
+            setupDeckNavigation();
+            syncInvitationCenterOffset();
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(syncInvitationCenterOffset);
+            }
+            window.addEventListener('resize', syncInvitationCenterOffset, { passive: true });
+            updateScrollProgress(0);
             updateCountdown();
-            window.addEventListener('scroll', updateScrollProgress, { passive: true });
-            window.addEventListener('resize', updateScrollProgress, { passive: true });
             setInterval(updateCountdown, 1000);
         });
     </script>
