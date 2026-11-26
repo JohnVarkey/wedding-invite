@@ -331,6 +331,9 @@
             width: 100%;
             overflow-y: auto;
             overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+            touch-action: pan-y;
             scrollbar-width: none;
             -ms-overflow-style: none;
             opacity: 0;
@@ -372,6 +375,7 @@
             width: 100%;
             max-width: 720px;
             margin: auto;
+            flex-shrink: 0;
             perspective: 3200px;
             transform-style: preserve-3d;
             transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
@@ -748,6 +752,7 @@
             width: 100%;
             max-width: 820px;
             margin: auto;
+            flex-shrink: 0;
             background-color: var(--bg-cotton);
             border: 1px solid var(--border-card);
             border-radius: 18px;
@@ -2146,6 +2151,7 @@
             width: 100%;
             max-width: 520px;
             margin: auto;
+            flex-shrink: 0;
             padding: 32px 24px;
             text-align: center;
             background-color: var(--bg-cotton);
@@ -3983,11 +3989,19 @@
             var settleDoneTimer = null;
             var leaveTimers = {};
             var wheelLockUntil = 0;
+            var internalScrollLockUntil = 0;
             var wheelAccum = 0;
             var wheelResetTimer = null;
             var touchStartY = 0;
             var touchStartIdx = 0;
+            var touchStartScrollTop = 0;
+            var touchStartAtTop = false;
+            var touchStartAtBottom = false;
             var isTouching = false;
+
+            function isSlideTall(slide) {
+                return !!(slide && slide.scrollHeight > slide.clientHeight + 2);
+            }
 
             function prefersReducedMotion() {
                 return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -4226,13 +4240,21 @@
                 }
 
                 var slide = slides[activeSlideIndex];
-                var isTall = slide && slide.scrollHeight > slide.clientHeight + 8;
+                var isTall = isSlideTall(slide);
 
                 if (isTall) {
-                    var atBottom = slide.scrollTop + slide.clientHeight >= slide.scrollHeight - 4;
-                    var atTop = slide.scrollTop <= 4;
-                    if (event.deltaY > 0 && !atBottom) return;
-                    if (event.deltaY < 0 && !atTop) return;
+                    var atBottom = slide.scrollTop + slide.clientHeight >= slide.scrollHeight - 2;
+                    var atTop = slide.scrollTop <= 2;
+                    if ((event.deltaY > 0 && !atBottom) || (event.deltaY < 0 && !atTop)) {
+                        internalScrollLockUntil = Date.now() + 420;
+                        wheelAccum = 0;
+                        return;
+                    }
+                    if (Date.now() < internalScrollLockUntil) {
+                        event.preventDefault();
+                        wheelAccum = 0;
+                        return;
+                    }
                 }
 
                 event.preventDefault();
@@ -4254,6 +4276,10 @@
                 setSlideMotionBusy(true);
                 touchStartY = event.touches[0].clientY;
                 touchStartIdx = activeSlideIndex;
+                var startSlide = slides[touchStartIdx];
+                touchStartScrollTop = startSlide ? startSlide.scrollTop : 0;
+                touchStartAtTop = !startSlide || startSlide.scrollTop <= 3;
+                touchStartAtBottom = !startSlide || (startSlide.scrollTop + startSlide.clientHeight >= startSlide.scrollHeight - 3);
             }, { passive: true });
 
             window.addEventListener('touchmove', function(event) {
@@ -4263,7 +4289,7 @@
                     return;
                 }
                 var slide = slides[touchStartIdx];
-                if (slide && slide.scrollHeight <= slide.clientHeight + 8) {
+                if (!isSlideTall(slide)) {
                     event.preventDefault();
                 }
             }, { passive: false });
@@ -4284,7 +4310,7 @@
 
                 var slide = slides[touchStartIdx];
                 var delta = touchStartY - event.changedTouches[0].clientY;
-                var isTall = slide && slide.scrollHeight > slide.clientHeight + 8;
+                var isTall = isSlideTall(slide);
 
                 if (!isTall) {
                     if (delta > 36 && touchStartIdx < slides.length - 1) {
@@ -4295,12 +4321,11 @@
                         return;
                     }
                 } else {
-                    var atBottom = slide.scrollTop + slide.clientHeight >= slide.scrollHeight - 6;
-                    var atTop = slide.scrollTop <= 6;
-                    if (atBottom && delta > 44 && touchStartIdx < slides.length - 1) {
+                    var didNotScroll = Math.abs(slide.scrollTop - touchStartScrollTop) < 8;
+                    if (touchStartAtBottom && didNotScroll && delta > 44 && touchStartIdx < slides.length - 1) {
                         goToSlide(touchStartIdx + 1, false);
                         return;
-                    } else if (atTop && delta < -44 && touchStartIdx > 0) {
+                    } else if (touchStartAtTop && didNotScroll && delta < -44 && touchStartIdx > 0) {
                         goToSlide(touchStartIdx - 1, true);
                         return;
                     }
@@ -4323,7 +4348,7 @@
                 }
 
                 var slide = slides[activeSlideIndex];
-                var isTall = slide && slide.scrollHeight > slide.clientHeight + 8;
+                var isTall = isSlideTall(slide);
 
                 if (event.key === 'ArrowDown' || event.key === 'PageDown' || (event.key === ' ' && !event.shiftKey)) {
                     if (isTall && slide.scrollTop + slide.clientHeight < slide.scrollHeight - 4) return;
