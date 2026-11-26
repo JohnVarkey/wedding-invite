@@ -905,6 +905,10 @@
             text-align: center;
             padding: 24px 16px;
             cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
             transition: opacity 0.85s ease, transform 0.85s ease;
         }
 
@@ -1259,6 +1263,10 @@
         }
 
         .timeline-milestone {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
             position: relative;
             background: linear-gradient(135deg, var(--bg-surface) 58%, var(--kasavu-gold-tint) 100%);
             border: 1px solid var(--border-gold);
@@ -1433,6 +1441,32 @@
 
         .milestone-meta .dot-sep {
             color: var(--border-gold);
+        }
+
+        .venue-link-hint {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ink-muted);
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .venue-link-arrow {
+            font-size: 0.78rem;
+            color: var(--kasavu-gold);
+            transition: transform 0.2s ease;
+        }
+
+        .timeline-milestone:hover .venue-link-hint {
+            color: var(--kasavu-gold);
+        }
+
+        .timeline-milestone:hover .venue-link-arrow {
+            transform: translate(2px, -2px);
         }
 
         /* ==========================================================================
@@ -2111,13 +2145,13 @@
                         </div>
 
                         <!-- Blurred-State Scripture Overlay -->
-                        <div class="scripture-veil" onclick="revealInvitationNow()" role="button" tabindex="0" aria-label="Reveal wedding invitation">
+                        <div class="scripture-veil" role="button" tabindex="0" aria-label="Reveal wedding invitation">
                             <span class="scripture-ornament" aria-hidden="true">✦</span>
                             <blockquote class="scripture-verse">
                                 “And now these three remain: faith, hope and love. But the greatest of these is love.”
                             </blockquote>
                             <cite class="scripture-ref">— 1 Corinthians 13:13</cite>
-                            <span class="scripture-hint">Tap to reveal</span>
+                            <span class="scripture-hint">Tap to reveal • Hold to pause</span>
                         </div>
                     </div>
                 </article>
@@ -2132,7 +2166,7 @@
 
                     <div class="ceremonial-timeline">
                         <!-- Engagement -->
-                        <div class="timeline-milestone">
+                        <a href="https://www.google.com/maps/dir/?api=1&amp;destination=YMCA+Auditorium%2C+Arumurikkada%2C+Kundara%2C+Kerala+691501" target="_blank" rel="noopener noreferrer" class="timeline-milestone">
                             <div class="milestone-medallion" aria-hidden="true">
                                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                                     <path d="M8 2 C5 5, 5 11, 8 14 C11 11, 11 5, 8 2 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.3"/>
@@ -2148,12 +2182,13 @@
                                     <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
                                     <circle cx="12" cy="10" r="3"/>
                                 </svg>
-                                <span>Thiruvalla, Kerala</span>
+                                <span>YMCA Auditorium, Arumurikkada, Kundara</span>
+                                <span class="venue-link-hint">Directions <span class="venue-link-arrow" aria-hidden="true">↗</span></span>
                             </div>
-                        </div>
+                        </a>
 
                         <!-- Wedding Ceremony -->
-                        <div class="timeline-milestone">
+                        <a href="https://www.google.com/maps/dir/?api=1&amp;destination=St+George+Orthodox+Church%2C+Chengaroor%2C+Kerala+689594" target="_blank" rel="noopener noreferrer" class="timeline-milestone">
                             <div class="milestone-medallion" aria-hidden="true">
                                 <svg class="rings-emblem" width="15" height="15" viewBox="0 0 16 16" fill="none">
                                     <circle cx="6.2" cy="8" r="3.6" stroke="var(--ink-primary)" stroke-width="1.3"/>
@@ -2170,12 +2205,13 @@
                                     <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
                                     <circle cx="12" cy="10" r="3"/>
                                 </svg>
-                                <span>Parish Church, Central Kerala</span>
+                                <span>St George Orthodox Church, Chengaroor (Chengaroor Church)</span>
+                                <span class="venue-link-hint">Directions <span class="venue-link-arrow" aria-hidden="true">↗</span></span>
                             </div>
-                        </div>
+                        </a>
 
                         <!-- Wedding Reception -->
-                        <div class="timeline-milestone">
+                        <a href="https://www.google.com/maps/dir/?api=1&amp;destination=St+George+Orthodox+Church%2C+Chengaroor%2C+Kerala+689594" target="_blank" rel="noopener noreferrer" class="timeline-milestone">
                             <div class="milestone-medallion" aria-hidden="true">
                                 <svg class="feast-emblem" width="14" height="14" viewBox="0 0 16 16" fill="none">
                                     <path d="M8 1.5 L9.5 6.5 L14.5 8 L9.5 9.5 L8 14.5 L6.5 9.5 L1.5 8 L6.5 6.5 Z" fill="var(--kasavu-gold-tint)" stroke="var(--kasavu-gold)" stroke-width="1.2"/>
@@ -2192,9 +2228,10 @@
                                     <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
                                     <circle cx="12" cy="10" r="3"/>
                                 </svg>
-                                <span>Parish Auditorium &amp; Gardens</span>
+                                <span>Church Auditorium, Chengaroor (nearby)</span>
+                                <span class="venue-link-hint">Directions <span class="venue-link-arrow" aria-hidden="true">↗</span></span>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 </article>
             </section>
@@ -2334,7 +2371,7 @@
             </section>
 
             <!-- =================================================================
-                 TRAVEL, STAY & ATTIRE (#travel)
+                 TRAVEL & STAY (#travel)
                  ================================================================= -->
             <section id="travel" class="album-chapter">
                 <article class="editorial-sheet">
@@ -2353,41 +2390,16 @@
                                 </div>
                             </div>
                             <p class="concierge-copy">
-                                Central Kerala is well connected by air, rail, and scenic state highways, making arrival straightforward whether you are flying in or traveling across Kerala.
+                                Our celebrations span Kundara (Kollam) for the Engagement and Chengaroor (near Thiruvalla &amp; Mallappally) for the Wedding, both easily reached by air, rail, and road.
                             </p>
                             <ul class="botanical-list">
-                                <li><strong>Airports:</strong> Cochin International Airport (COK, ~2.5 hrs drive) and Trivandrum International Airport (TRV, ~3 hrs drive) both offer direct domestic and Gulf connections.</li>
-                                <li><strong>By Rail:</strong> Thiruvalla Railway Station (TRVL) sits just 10 minutes from our venues with frequent express trains.</li>
-                                <li><strong>Local Cabs:</strong> Airport transfers and local cab coordination are available on request—simply mention your arrival details in your RSVP note.</li>
+                                <li><strong>Airports:</strong> Trivandrum International Airport (TRV, ~1.5–2 hrs to Kundara; ~3 hrs to Chengaroor) and Cochin International Airport (COK, ~2.5–3 hrs to Chengaroor) offer frequent domestic and Gulf connections.</li>
+                                <li><strong>By Rail:</strong> <strong>Kundara</strong> (KUV) and <strong>Kollam Junction</strong> (QLN, ~25 mins) serve the Engagement venue; <strong>Thiruvalla Railway Station</strong> (TRVL, ~25 mins) is the nearest railhead to Chengaroor Church.</li>
+                                <li><strong>Local Transfers:</strong> Airport pickups and cab coordination between Kundara, Thiruvalla, and Chengaroor are available on request—share your arrival plans in your RSVP note.</li>
                             </ul>
                         </div>
 
-                        <!-- July Monsoon & Attire Note -->
-                        <div class="concierge-entry">
-                            <div class="concierge-head">
-                                <div class="concierge-icon" aria-hidden="true">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/>
-                                        <path d="M16 14v6"/>
-                                        <path d="M8 14v6"/>
-                                        <path d="M12 16v6"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <span class="concierge-kicker">Seasonal Dressing</span>
-                                    <h3 class="concierge-title">July Monsoon &amp; Attire Note</h3>
-                                </div>
-                            </div>
-                            <p class="concierge-copy">
-                                July brings lush emerald greenery, cool breezes, and refreshing monsoon showers to Central Kerala.
-                            </p>
-                            <ul class="botanical-list">
-                                <li><strong>Festive Palette:</strong> Classic Kerala Kasavu sarees and mundus, light breathable silks, pastel linen suits, and elegant formal wear fit the mood effortlessly.</li>
-                                <li><strong>Monsoon Comfort:</strong> Choose breathable fabrics and comfortable footwear for church and hall transitions, and keep a compact umbrella handy between stops.</li>
-                            </ul>
-                        </div>
-
-                        <!-- Recommended Stays -->
+                        <!-- Hospitality & Lodging -->
                         <div class="concierge-entry">
                             <div class="concierge-head">
                                 <div class="concierge-icon" aria-hidden="true">
@@ -2401,11 +2413,12 @@
                                 </div>
                             </div>
                             <p class="concierge-copy">
-                                Curated boutique and heritage stays in Thiruvalla and Changanassery are located within 10–15 minutes of both venues, with family room blocks held until May 2027.
+                                Whether you are joining us in Kundara, Chengaroor, or for the full week of celebrations, warm Kerala hospitality and comfortable town or lakeside stays are nearby.
                             </p>
                             <ul class="botanical-list">
-                                <li><strong>Thiruvalla &amp; Changanassery:</strong> Quiet riverside heritage homes and modern town hotels close to the church and reception hall.</li>
-                                <li><strong>Family Room Blocks:</strong> Let us know your check-in dates when you RSVP and we will gladly share booking codes and local assistance.</li>
+                                <li><strong>Engagement (Kundara &amp; Kollam):</strong> Ashtamudi lakeside resorts and modern town hotels in Kollam sit 20–25 minutes from YMCA Auditorium, Arumurikkada.</li>
+                                <li><strong>Wedding (Thiruvalla &amp; Mallappally):</strong> Boutique town hotels and quiet riverside heritage homes across Thiruvalla and Mallappally are 15–30 minutes from St George Orthodox Church, Chengaroor.</li>
+                                <li><strong>Stay Assistance:</strong> Let us know your check-in dates and guest count when you RSVP—our families will gladly share nearby stay options and help arrange rooms.</li>
                             </ul>
                         </div>
                     </div>
@@ -2965,17 +2978,72 @@
             });
         }
 
+        var VERSE_READ_DELAY_MS = 4800;
         var invitationTimer = null;
-        var invitationInitialized = false;
+        var invitationTimerStartedAt = 0;
+        var invitationRemainingMs = VERSE_READ_DELAY_MS;
+        var invitationRevealed = false;
+        var invitationHolding = false;
+        var slideMotionBusy = false;
+
+        function pauseInvitationTimer(minRemainingMs) {
+            if (invitationTimer) {
+                clearTimeout(invitationTimer);
+                invitationTimer = null;
+                var elapsed = Date.now() - invitationTimerStartedAt;
+                invitationRemainingMs = Math.max(0, invitationRemainingMs - elapsed);
+            }
+            if (typeof minRemainingMs === 'number' && !invitationRevealed) {
+                invitationRemainingMs = Math.max(invitationRemainingMs, minRemainingMs);
+            }
+        }
 
         function revealInvitationNow() {
             var sheet = document.getElementById('invitation-sheet');
             if (!sheet) return;
+            invitationRevealed = true;
+            invitationHolding = false;
             if (invitationTimer) {
                 clearTimeout(invitationTimer);
                 invitationTimer = null;
             }
             sheet.classList.add('is-unblurred');
+        }
+
+        function syncInvitationTimer() {
+            var sheet = document.getElementById('invitation-sheet');
+            if (!sheet || invitationRevealed) return;
+
+            var rect = sheet.getBoundingClientRect();
+            var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+            var visiblePx = Math.max(0, Math.min(vh, rect.bottom) - Math.max(0, rect.top));
+            var fracSheet = rect.height > 0 ? visiblePx / rect.height : 0;
+            var fracVh = vh > 0 ? visiblePx / vh : 0;
+            var inMainView = !document.hidden && visiblePx > 0 && (fracSheet >= 0.55 || fracVh >= 0.55);
+            var clearlyLeftView = visiblePx <= 0 || (fracSheet < 0.35 && fracVh < 0.35);
+
+            if (clearlyLeftView) {
+                pauseInvitationTimer();
+                invitationRemainingMs = VERSE_READ_DELAY_MS;
+                return;
+            }
+
+            if (!inMainView || slideMotionBusy || invitationHolding) {
+                pauseInvitationTimer();
+                return;
+            }
+
+            if (!invitationTimer) {
+                invitationTimerStartedAt = Date.now();
+                invitationTimer = setTimeout(function() {
+                    revealInvitationNow();
+                }, invitationRemainingMs);
+            }
+        }
+
+        function setSlideMotionBusy(busy) {
+            slideMotionBusy = !!busy;
+            syncInvitationTimer();
         }
 
         function setupInvitationTrigger() {
@@ -2984,6 +3052,59 @@
 
             var veil = sheet.querySelector('.scripture-veil');
             if (veil) {
+                var pressStartTime = 0;
+                var pressStartX = 0;
+                var pressStartY = 0;
+                var pressMoved = false;
+                var suppressClickUntil = 0;
+
+                veil.addEventListener('pointerdown', function(event) {
+                    if (invitationRevealed) return;
+                    if (event.button && event.button !== 0) return;
+                    invitationHolding = true;
+                    pressStartTime = Date.now();
+                    pressStartX = event.clientX;
+                    pressStartY = event.clientY;
+                    pressMoved = false;
+                    pauseInvitationTimer();
+                });
+
+                veil.addEventListener('pointermove', function(event) {
+                    if (!invitationHolding) return;
+                    var dx = event.clientX - pressStartX;
+                    var dy = event.clientY - pressStartY;
+                    if (Math.hypot(dx, dy) > 12) {
+                        pressMoved = true;
+                    }
+                });
+
+                function endHold(isCancelled) {
+                    if (!invitationHolding) return;
+                    invitationHolding = false;
+                    var heldMs = Date.now() - pressStartTime;
+                    if (isCancelled || pressMoved || heldMs >= 240) {
+                        suppressClickUntil = Date.now() + 500;
+                        pauseInvitationTimer(1600);
+                    }
+                    syncInvitationTimer();
+                }
+
+                veil.addEventListener('pointerup', function() {
+                    endHold(false);
+                });
+
+                veil.addEventListener('pointercancel', function() {
+                    endHold(true);
+                });
+
+                veil.addEventListener('click', function(event) {
+                    if (Date.now() < suppressClickUntil) {
+                        event.preventDefault();
+                        return;
+                    }
+                    revealInvitationNow();
+                });
+
                 veil.addEventListener('keydown', function(event) {
                     if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();
@@ -2993,23 +3114,16 @@
             }
 
             if ('IntersectionObserver' in window) {
-                var obs = new IntersectionObserver(function(entries) {
-                    entries.forEach(function(entry) {
-                        if (entry.isIntersecting && !invitationInitialized) {
-                            invitationInitialized = true;
-                            invitationTimer = setTimeout(function() {
-                                sheet.classList.add('is-unblurred');
-                                invitationTimer = null;
-                            }, 2600);
-                            obs.unobserve(sheet);
-                        }
-                    });
-                }, { threshold: 0.2 });
+                var obs = new IntersectionObserver(function() {
+                    syncInvitationTimer();
+                }, { threshold: [0, 0.25, 0.4, 0.55, 0.75] });
 
                 obs.observe(sheet);
+                window.addEventListener('scroll', syncInvitationTimer, { passive: true });
+                document.addEventListener('visibilitychange', syncInvitationTimer);
+                syncInvitationTimer();
             } else {
-                invitationInitialized = true;
-                sheet.classList.add('is-unblurred');
+                revealInvitationNow();
             }
         }
 
@@ -3091,10 +3205,12 @@
                     window.scrollTo(0, targetY);
                     updateScrollProgress();
                     isAutoScrolling = false;
+                    setSlideMotionBusy(isTouching);
                     return;
                 }
 
                 isAutoScrolling = true;
+                setSlideMotionBusy(true);
                 var duration = 640;
                 var startTime = null;
 
@@ -3115,6 +3231,7 @@
                     } else {
                         scrollAnimId = null;
                         isAutoScrolling = false;
+                        setSlideMotionBusy(isTouching);
                     }
                 }
 
@@ -3168,6 +3285,7 @@
             window.addEventListener('touchstart', function(event) {
                 if (event.touches.length !== 1) return;
                 isTouching = true;
+                setSlideMotionBusy(true);
                 if (settleTimer) clearTimeout(settleTimer);
                 touchStartY = event.touches[0].clientY;
                 touchStartIdx = getCurrentSlideIndex();
@@ -3175,10 +3293,14 @@
 
             window.addEventListener('touchend', function(event) {
                 isTouching = false;
-                if (!event.changedTouches.length) return;
+                if (!event.changedTouches.length) {
+                    setSlideMotionBusy(isAutoScrolling);
+                    return;
+                }
 
                 var switcher = document.getElementById('palette-switcher');
                 if (switcher && switcher.classList.contains('is-open') && switcher.contains(event.target)) {
+                    setSlideMotionBusy(isAutoScrolling);
                     return;
                 }
 
@@ -3192,8 +3314,17 @@
                         scrollToSlide(touchStartIdx - 1, true);
                     } else if (Math.abs(delta) > 6) {
                         scrollToSlide(touchStartIdx, false);
+                    } else {
+                        setSlideMotionBusy(isAutoScrolling);
                     }
+                } else {
+                    setSlideMotionBusy(isAutoScrolling);
                 }
+            }, { passive: true });
+
+            window.addEventListener('touchcancel', function() {
+                isTouching = false;
+                setSlideMotionBusy(isAutoScrolling);
             }, { passive: true });
 
             window.addEventListener('scroll', function() {
