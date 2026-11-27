@@ -2448,9 +2448,27 @@
                 right: 10px;
                 bottom: 10px;
             }
-            .movie-toggle-btn {
+            .palette-trigger {
+                padding: 7px 10px;
+                gap: 6px;
+                font-size: 0.69rem;
+                max-width: calc(100vw - 208px);
+            }
+            #palette-trigger-label {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .bottom-left-dock {
                 left: 10px;
                 bottom: 10px;
+                padding: 3px;
+                gap: 2px;
+            }
+            .dock-toggle-btn {
+                padding: 5px 8px;
+                font-size: 0.67rem;
+                gap: 4px;
             }
             .palette-menu {
                 width: min(290px, calc(100vw - 20px));
@@ -2632,46 +2650,79 @@
             transform: scale(0.98);
         }
 
-        .movie-toggle-btn {
+        .bottom-left-dock {
             position: fixed;
             left: 16px;
             bottom: 16px;
             z-index: 70;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 8px 13px;
+            gap: 3px;
+            padding: 3px;
             border-radius: 999px;
             border: 1px solid var(--border-gold);
             background-color: var(--header-bg);
-            color: var(--ink-primary);
-            font-family: var(--font-sans);
-            font-size: 0.71rem;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            cursor: pointer;
             box-shadow: 0 8px 22px rgba(24, 24, 20, 0.14);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            transition: background-color 0.2s ease, transform 0.15s ease, opacity 0.25s ease;
         }
 
-        .movie-toggle-btn:hover {
+        .dock-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            background-color: transparent;
+            color: var(--ink-muted);
+            font-family: var(--font-sans);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            line-height: 1.1;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+        }
+
+        .dock-toggle-btn:hover {
+            color: var(--ink-primary);
             background-color: var(--kasavu-gold-tint);
         }
 
-        .movie-toggle-btn:active {
-            transform: scale(0.98);
+        .dock-toggle-btn:active {
+            transform: scale(0.97);
         }
 
-        .movie-toggle-btn.is-hidden {
-            opacity: 0;
-            pointer-events: none;
+        .dock-toggle-btn.is-active {
+            background-color: var(--kasavu-gold-tint);
+            border-color: var(--border-gold);
+            color: var(--ink-primary);
+        }
+
+        .dock-btn-svg {
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+            display: block;
+        }
+
+        .dock-toggle-btn.is-playing .music-note-svg {
+            animation: musicPulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes musicPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.14); }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .movie-toggle-btn {
+            #movie-toggle-btn,
+            #repeat-toggle-btn {
                 display: none !important;
+            }
+            .dock-toggle-btn.is-playing .music-note-svg {
+                animation: none;
             }
         }
     </style>
@@ -3294,11 +3345,41 @@
 
         </main>
 
-        <!-- Auto-Play Story Movie Control -->
-        <button type="button" id="movie-toggle-btn" class="movie-toggle-btn" onclick="toggleMovieAutoPlay()" aria-pressed="false" aria-label="Pause auto-advance">
-            <span id="movie-toggle-icon" aria-hidden="true">❚❚</span>
-            <span id="movie-toggle-label">Auto</span>
-        </button>
+        <!-- Background Wedding Audio (Can't help falling in love - David Bay) -->
+        <audio id="bg-music" loop preload="auto" playsinline aria-hidden="true">
+            <source src="public/music.m4a" type="audio/mp4">
+        </audio>
+
+        <!-- Bottom-Left Playback Controls (Music, Auto, Repeat) -->
+        <div id="bottom-left-dock" class="bottom-left-dock" role="group" aria-label="Playback controls">
+            <button type="button" id="music-toggle-btn" class="dock-toggle-btn is-active" onclick="toggleMusicPlayback()" aria-pressed="true" aria-label="Music On — click to mute" title="Music: On (Can't Help Falling in Love - David Bay)">
+                <svg id="music-toggle-svg-on" class="dock-btn-svg music-note-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 18V5l11-2v13"/>
+                    <circle cx="6" cy="18" r="3"/>
+                    <circle cx="17" cy="16" r="3"/>
+                </svg>
+                <svg id="music-toggle-svg-off" class="dock-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                    <path d="M9 18V5l11-2v13"/>
+                    <circle cx="6" cy="18" r="3"/>
+                    <circle cx="17" cy="16" r="3"/>
+                    <line x1="3" y1="3" x2="21" y2="21"/>
+                </svg>
+                <span id="music-toggle-label">Music</span>
+            </button>
+            <button type="button" id="movie-toggle-btn" class="dock-toggle-btn is-active" onclick="toggleMovieAutoPlay()" aria-pressed="true" aria-label="Auto advance On — click to pause" title="Auto advance: On">
+                <span id="movie-toggle-icon" aria-hidden="true">❚❚</span>
+                <span id="movie-toggle-label">Auto</span>
+            </button>
+            <button type="button" id="repeat-toggle-btn" class="dock-toggle-btn" onclick="toggleMovieRepeat()" aria-pressed="false" aria-label="Repeat slideshow Off — click to repeat" title="Repeat slideshow: Off">
+                <svg class="dock-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="17 1 21 5 17 9"/>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                    <polyline points="7 23 3 19 7 15"/>
+                    <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                </svg>
+                <span id="repeat-toggle-label">Repeat</span>
+            </button>
+        </div>
 
         <!-- Live Palette Preview Switcher -->
         <aside id="palette-switcher" class="palette-switcher" aria-label="Color palette preview">
@@ -3726,6 +3807,7 @@
 
         var syncMoviePlayback = function() {};
         var toggleMovieAutoPlay = function() {};
+        var toggleMovieRepeat = function() {};
         var notifyMovieFormInteraction = function() {};
         var rsvpJustSubmitted = false;
 
@@ -4097,6 +4179,7 @@
                 rsvp: 4000
             };
             var movieUserPaused = false;
+            var movieRepeatEnabled = false;
             var movieFormPaused = false;
             var movieFormManualOverride = false;
             var movieTimer = null;
@@ -4142,14 +4225,23 @@
                 var btn = document.getElementById('movie-toggle-btn');
                 var icon = document.getElementById('movie-toggle-icon');
                 var label = document.getElementById('movie-toggle-label');
-                if (!btn) return;
-                var atEnd = activeSlideIndex >= slides.length - 1;
                 var isPaused = movieUserPaused || isRsvpEditing();
-                btn.classList.toggle('is-hidden', atEnd);
-                btn.setAttribute('aria-pressed', isPaused ? 'true' : 'false');
-                btn.setAttribute('aria-label', isPaused ? 'Resume auto-advance' : 'Pause auto-advance');
-                if (icon) icon.textContent = isPaused ? '▶' : '❚❚';
-                if (label) label.textContent = isPaused ? 'Paused' : 'Auto';
+                if (btn) {
+                    btn.classList.toggle('is-active', !isPaused);
+                    btn.setAttribute('aria-pressed', !isPaused ? 'true' : 'false');
+                    btn.setAttribute('aria-label', isPaused ? 'Auto advance Off — click to resume' : 'Auto advance On — click to pause');
+                    btn.setAttribute('title', isPaused ? 'Auto advance: Off' : 'Auto advance: On');
+                    if (icon) icon.textContent = isPaused ? '▶' : '❚❚';
+                    if (label) label.textContent = 'Auto';
+                }
+
+                var repBtn = document.getElementById('repeat-toggle-btn');
+                if (repBtn) {
+                    repBtn.classList.toggle('is-active', movieRepeatEnabled);
+                    repBtn.setAttribute('aria-pressed', movieRepeatEnabled ? 'true' : 'false');
+                    repBtn.setAttribute('aria-label', movieRepeatEnabled ? 'Repeat slideshow On — click to turn off' : 'Repeat slideshow Off — click to repeat');
+                    repBtn.setAttribute('title', movieRepeatEnabled ? 'Repeat slideshow: On' : 'Repeat slideshow: Off');
+                }
             }
 
             function scheduleMovieStep() {
@@ -4163,7 +4255,20 @@
                 if (switcher && switcher.classList.contains('is-open')) return;
 
                 var slide = slides[activeSlideIndex];
-                if (!slide || activeSlideIndex >= slides.length - 1) return;
+                if (!slide) return;
+
+                if (activeSlideIndex >= slides.length - 1) {
+                    if (!movieRepeatEnabled) return;
+                    var farewellEl = document.getElementById('farewell');
+                    var repeatWaitMs = (farewellEl && farewellEl.classList.contains('is-post-visible')) ? 2200 : 5000;
+                    movieTimer = setTimeout(function() {
+                        movieTimer = null;
+                        if (!movieUserPaused && movieRepeatEnabled && !isTransitioning && !isAlbumOpening && !isTouching) {
+                            goToSlide(0, false);
+                        }
+                    }, repeatWaitMs);
+                    return;
+                }
 
                 if (slide.id === 'invitation' && (!invitationRevealed || !invitationDetailsShown)) return;
                 if (isRsvpEditing()) return;
@@ -4220,6 +4325,16 @@
                     movieUserPaused = true;
                     clearMovieTimers();
                     updateMovieToggleUI();
+                }
+            };
+
+            toggleMovieRepeat = function() {
+                movieRepeatEnabled = !movieRepeatEnabled;
+                updateMovieToggleUI();
+                if (movieRepeatEnabled) {
+                    scheduleMovieStep();
+                } else if (activeSlideIndex >= slides.length - 1) {
+                    clearMovieTimers();
                 }
             };
 
@@ -4679,6 +4794,173 @@
             activateImmediate(0);
         }
 
+        // 8. Background Wedding Music (Can't help falling in love - David Bay)
+        var musicEnabled = true;
+        var musicActuallyPlaying = false;
+        var musicAwaitingGesture = false;
+        var musicUnavailable = false;
+
+        function getBgMusicEl() {
+            return document.getElementById('bg-music');
+        }
+
+        function updateMusicToggleUI() {
+            var btn = document.getElementById('music-toggle-btn');
+            var svgOn = document.getElementById('music-toggle-svg-on');
+            var svgOff = document.getElementById('music-toggle-svg-off');
+            if (!btn) return;
+
+            btn.classList.toggle('is-active', musicEnabled && !musicUnavailable);
+            btn.classList.toggle('is-playing', musicEnabled && musicActuallyPlaying && !musicUnavailable);
+            btn.setAttribute('aria-pressed', musicEnabled ? 'true' : 'false');
+
+            if (svgOn) svgOn.style.display = musicEnabled ? 'block' : 'none';
+            if (svgOff) svgOff.style.display = musicEnabled ? 'none' : 'block';
+
+            if (musicUnavailable) {
+                btn.setAttribute('aria-label', 'Music file not found');
+                btn.setAttribute('title', 'Add music.mp3 (or music.m4a) to enable background music');
+            } else if (musicEnabled && musicAwaitingGesture && !musicActuallyPlaying) {
+                btn.setAttribute('aria-label', 'Music On — tap to play');
+                btn.setAttribute('title', "Music: On (tap anywhere to start audio) — Can't Help Falling in Love");
+            } else if (musicEnabled) {
+                btn.setAttribute('aria-label', 'Music On — click to pause');
+                btn.setAttribute('title', "Music: On — Can't Help Falling in Love (David Bay)");
+            } else {
+                btn.setAttribute('aria-label', 'Music Off — click to play');
+                btn.setAttribute('title', 'Music: Off');
+            }
+        }
+
+        function startMusicPlayer() {
+            var audio = getBgMusicEl();
+            if (!audio || musicUnavailable || !musicEnabled || document.hidden) return;
+            try {
+                audio.volume = 0.72;
+                var playPromise = audio.play();
+                if (playPromise && typeof playPromise.then === 'function') {
+                    playPromise.then(function() {
+                        musicActuallyPlaying = true;
+                        musicAwaitingGesture = false;
+                        updateMusicToggleUI();
+                    }).catch(function(err) {
+                        if (err && (err.name === 'NotSupportedError' || err.name === 'AbortError') && audio.error) {
+                            musicUnavailable = true;
+                        } else {
+                            musicAwaitingGesture = true;
+                        }
+                        musicActuallyPlaying = false;
+                        updateMusicToggleUI();
+                    });
+                }
+            } catch (e) {
+                musicAwaitingGesture = true;
+                updateMusicToggleUI();
+            }
+        }
+
+        function pauseMusicPlayer() {
+            var audio = getBgMusicEl();
+            if (!audio) return;
+            try {
+                audio.pause();
+            } catch (e) {}
+            musicActuallyPlaying = false;
+        }
+
+        function toggleMusicPlayback() {
+            if (musicEnabled && musicAwaitingGesture && !musicActuallyPlaying) {
+                musicAwaitingGesture = false;
+                startMusicPlayer();
+                updateMusicToggleUI();
+                return;
+            }
+
+            musicEnabled = !musicEnabled;
+            musicAwaitingGesture = false;
+
+            if (musicEnabled) {
+                if (musicUnavailable) {
+                    var audio = getBgMusicEl();
+                    if (audio) {
+                        musicUnavailable = false;
+                        audio.load();
+                    }
+                }
+                startMusicPlayer();
+            } else {
+                pauseMusicPlayer();
+            }
+            updateMusicToggleUI();
+        }
+
+        function initBackgroundMusic() {
+            var audio = getBgMusicEl();
+            updateMusicToggleUI();
+            if (!audio) return;
+
+            audio.addEventListener('playing', function() {
+                if (!musicEnabled || document.hidden) {
+                    pauseMusicPlayer();
+                    return;
+                }
+                musicUnavailable = false;
+                musicActuallyPlaying = true;
+                musicAwaitingGesture = false;
+                updateMusicToggleUI();
+            });
+
+            audio.addEventListener('pause', function() {
+                musicActuallyPlaying = false;
+                updateMusicToggleUI();
+            });
+
+            audio.addEventListener('canplay', function() {
+                musicUnavailable = false;
+                updateMusicToggleUI();
+            });
+
+            audio.addEventListener('error', function() {
+                musicUnavailable = true;
+                musicActuallyPlaying = false;
+                updateMusicToggleUI();
+            });
+
+            var lastSource = audio.querySelector('source:last-of-type');
+            if (lastSource) {
+                lastSource.addEventListener('error', function() {
+                    musicUnavailable = true;
+                    musicActuallyPlaying = false;
+                    updateMusicToggleUI();
+                });
+            }
+
+            if (musicEnabled && !document.hidden) {
+                startMusicPlayer();
+            }
+
+            function unlockMusicOnGesture(event) {
+                if (!musicEnabled || musicActuallyPlaying || musicUnavailable || document.hidden) return;
+                if (event.target && event.target.closest && event.target.closest('#music-toggle-btn')) return;
+                musicAwaitingGesture = false;
+                startMusicPlayer();
+            }
+
+            window.addEventListener('pointerdown', unlockMusicOnGesture, { passive: true });
+            window.addEventListener('touchend', unlockMusicOnGesture, { passive: true });
+            window.addEventListener('click', unlockMusicOnGesture, { passive: true });
+            window.addEventListener('keydown', unlockMusicOnGesture, { passive: true });
+
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    pauseMusicPlayer();
+                    updateMusicToggleUI();
+                } else if (musicEnabled) {
+                    startMusicPlayer();
+                }
+            });
+        }
+
         function syncInvitationCenterOffset() {
             var details = document.querySelector('#invitation-sheet .invitation-details-reveal');
             var header = document.querySelector('#invitation-sheet .invitation-header-block');
@@ -4692,6 +4974,7 @@
             createPetals();
             setupInvitationTrigger();
             setupDeckNavigation();
+            initBackgroundMusic();
             syncInvitationCenterOffset();
             if (document.fonts && document.fonts.ready) {
                 document.fonts.ready.then(syncInvitationCenterOffset);
