@@ -71,7 +71,7 @@
                rel="stylesheet"
           />
 
-          <link rel="stylesheet" href="styles.css?v=4" />
+          <link rel="stylesheet" href="styles.css?v=4.1" />
      </head>
      <body>
           <div class="album-world">
@@ -783,146 +783,218 @@
                     </section>
 
                     <!-- =================================================================
-                 THROUGH OUR EYES — PHOTOBOOK & SHARED REACTIONS (#story)
+                 THROUGH OUR EYES — BUMBLE-STYLE CARDS & CLOUD POP-UPS (#story)
                  ================================================================= -->
                     <section id="story" class="album-chapter">
-                         <article id="story-sheet" class="editorial-sheet">
-                              <div class="frames-head">
-                                   <div>
-                                        <span class="chapter-eyebrow"
-                                             >Frames &amp; Side Notes • Manna
-                                             &amp; John</span
+                         <article
+                              id="story-sheet"
+                              class="editorial-sheet story-bumble-sheet"
+                         >
+                              <div
+                                   id="story-bumble-stage"
+                                   class="bumble-stage"
+                                   aria-label="Interactive story cards"
+                              >
+                                   <!-- Segmented Story Bars -->
+                                   <div
+                                        id="story-bars"
+                                        class="bumble-bars"
+                                        role="tablist"
+                                        aria-label="Story cards"
+                                   ></div>
+
+                                   <!-- Card 0: Plain Heading Intro Card -->
+                                   <div
+                                        id="story-intro-view"
+                                        class="bumble-intro-card"
+                                   >
+                                        <span
+                                             id="story-intro-eyebrow"
+                                             class="chapter-eyebrow"
+                                             >Frames &amp; Side Notes</span
                                         >
-                                        <h2 class="frames-title">
+                                        <h2
+                                             id="story-intro-title"
+                                             class="bumble-intro-title"
+                                        >
                                              Through Our Eyes
                                         </h2>
-                                   </div>
-                                   <span
-                                        id="story-frame-counter"
-                                        class="frames-counter"
-                                        >01 / 04</span
-                                   >
-                              </div>
-
-                              <div class="frames-grid">
-                                   <!-- Left / Top: Interactive Polaroid Stack -->
-                                   <div class="frames-photo-col">
                                         <div
-                                             id="polaroid-stack"
-                                             class="polaroid-stage"
-                                             aria-label="Interactive photo stack"
+                                             class="lotus-divider"
+                                             aria-hidden="true"
+                                        >
+                                             <span></span>
+                                             <svg
+                                                  width="54"
+                                                  height="22"
+                                                  viewBox="0 0 54 22"
+                                                  fill="none"
+                                             >
+                                                  <path
+                                                       d="M27 3 C23 9, 23 15, 27 19 C31 15, 31 9, 27 3 Z"
+                                                       fill="var(--kasavu-gold-tint)"
+                                                       stroke="var(--ink-primary)"
+                                                       stroke-width="1.2"
+                                                  />
+                                                  <path
+                                                       d="M21 7 C16 10, 15 15, 19 18 C22 16, 23 11, 21 7 Z"
+                                                       fill="var(--bg-surface)"
+                                                       stroke="var(--kasavu-gold)"
+                                                       stroke-width="1.1"
+                                                  />
+                                                  <path
+                                                       d="M33 7 C38 10, 39 15, 35 18 C32 16, 31 11, 33 7 Z"
+                                                       fill="var(--bg-surface)"
+                                                       stroke="var(--kasavu-gold)"
+                                                       stroke-width="1.1"
+                                                  />
+                                                  <circle
+                                                       cx="11"
+                                                       cy="14"
+                                                       r="2"
+                                                       fill="var(--kasavu-gold)"
+                                                  />
+                                                  <circle
+                                                       cx="43"
+                                                       cy="14"
+                                                       r="2"
+                                                       fill="var(--kasavu-gold)"
+                                                  />
+                                             </svg>
+                                             <span></span>
+                                        </div>
+                                        <p
+                                             id="story-intro-sub"
+                                             class="bumble-intro-sub"
+                                        >
+                                             Manna &amp; John • Four frames,
+                                             both of us reacting together
+                                        </p>
+                                        <span
+                                             id="story-intro-hint"
+                                             class="bumble-intro-hint"
+                                             >Tap right or swipe to begin ›</span
+                                        >
+                                   </div>
+
+                                   <!-- Cards 1–4: Photo + Cloud Pop-up Conversation -->
+                                   <div
+                                        id="story-photo-view"
+                                        class="bumble-photo-card is-hidden"
+                                   >
+                                        <div
+                                             id="story-media"
+                                             class="bumble-media"
+                                        ></div>
+                                        <div
+                                             class="bumble-scrim"
+                                             aria-hidden="true"
                                         ></div>
 
-                                        <div class="frames-controls">
-                                             <button
-                                                  id="story-btn-prev"
-                                                  type="button"
-                                                  class="frame-ctrl-btn"
-                                             >
-                                                  ← Prev
-                                             </button>
+                                        <!-- Top Chip & Optional Note Toggle -->
+                                        <div class="bumble-top-meta">
+                                             <div class="bumble-title-group">
+                                                  <span
+                                                       id="story-photo-chip"
+                                                       class="bumble-chip"
+                                                  ></span>
+                                                  <h3
+                                                       id="story-photo-title"
+                                                       class="bumble-photo-title"
+                                                  ></h3>
+                                             </div>
                                              <button
                                                   id="story-btn-flip"
                                                   type="button"
-                                                  class="frame-ctrl-btn is-note"
+                                                  class="bumble-note-btn"
+                                                  aria-pressed="false"
                                              >
                                                   Note ↻
                                              </button>
-                                             <button
-                                                  id="story-btn-next"
-                                                  type="button"
-                                                  class="frame-ctrl-btn is-primary"
-                                             >
-                                                  Next →
-                                             </button>
                                         </div>
-                                   </div>
 
-                                   <!-- Right / Bottom: Shared Reaction Together -->
-                                   <div class="frames-story-col">
+                                        <!-- Cloud Pop-ups at the Bottom -->
                                         <div
-                                             id="story-reaction-swap"
-                                             class="frames-story-swap"
-                                             style="
-                                                  display: flex;
-                                                  flex-direction: column;
-                                                  gap: 10px;
-                                             "
+                                             id="story-clouds"
+                                             class="bumble-clouds"
                                         >
-                                             <div class="frames-meta-row">
-                                                  <div>
+                                             <div
+                                                  class="cloud-bubble is-john"
+                                             >
+                                                  <span class="cloud-sender">
                                                        <span
-                                                            id="story-frame-kicker"
-                                                            class="frame-kicker"
-                                                            >Frame 01 • Dubai
-                                                            &amp; Kuwait</span
+                                                            class="cloud-dot"
+                                                            >J</span
                                                        >
-                                                       <h3
-                                                            id="story-frame-title"
-                                                            class="frame-heading"
-                                                       >
-                                                            Two Coasts, Before
-                                                            We Knew
-                                                       </h3>
-                                                  </div>
-                                                  <span
-                                                       id="story-frame-tag"
-                                                       class="frame-tag-pill"
-                                                       >Before Us</span
-                                                  >
-                                             </div>
-
-                                             <div class="reaction-stack">
-                                                  <div class="reaction-card">
-                                                       <div class="reaction-who">
-                                                            <span
-                                                                 class="reaction-avatar"
-                                                                 >J</span
-                                                            >
-                                                            <span
-                                                                 class="reaction-label"
-                                                                 >John looking
-                                                                 at this</span
-                                                            >
-                                                       </div>
-                                                       <p
-                                                            id="story-react-john"
-                                                            class="reaction-quote"
-                                                       ></p>
-                                                  </div>
-
-                                                  <div class="reaction-card">
-                                                       <div class="reaction-who">
-                                                            <span
-                                                                 class="reaction-avatar"
-                                                                 >M</span
-                                                            >
-                                                            <span
-                                                                 class="reaction-label"
-                                                                 >Manna looking
-                                                                 at this</span
-                                                            >
-                                                       </div>
-                                                       <p
-                                                            id="story-react-manna"
-                                                            class="reaction-quote"
-                                                       ></p>
-                                                  </div>
+                                                       John
+                                                  </span>
+                                                  <p
+                                                       id="story-react-john"
+                                                       class="cloud-text"
+                                                  ></p>
                                              </div>
 
                                              <div
-                                                  id="story-shared-verdict"
-                                                  class="frames-verdict"
-                                             ></div>
+                                                  class="cloud-bubble is-manna"
+                                             >
+                                                  <span class="cloud-sender">
+                                                       <span
+                                                            class="cloud-dot"
+                                                            >M</span
+                                                       >
+                                                       Manna
+                                                  </span>
+                                                  <p
+                                                       id="story-react-manna"
+                                                       class="cloud-text"
+                                                  ></p>
+                                             </div>
                                         </div>
 
+                                        <!-- Optional Note Overlay -->
                                         <div
-                                             id="story-frame-pills"
-                                             class="frames-pills"
-                                             role="tablist"
-                                             aria-label="Story frames"
-                                        ></div>
+                                             id="story-note-overlay"
+                                             class="bumble-note-overlay"
+                                             hidden
+                                        >
+                                             <span class="chapter-eyebrow"
+                                                  >Side Note</span
+                                             >
+                                             <p
+                                                  id="story-back-note"
+                                                  class="bumble-note-copy"
+                                             ></p>
+                                             <span class="bumble-note-close-hint"
+                                                  >Tap Note ↻ to return</span
+                                             >
+                                        </div>
                                    </div>
+
+                                   <!-- Full-Card Bumble Tap Zones (Left = Prev, Right = Next) -->
+                                   <button
+                                        id="story-tap-prev"
+                                        type="button"
+                                        class="bumble-tap-zone is-prev"
+                                        aria-label="Previous story card"
+                                   >
+                                        <span
+                                             class="bumble-chevron"
+                                             aria-hidden="true"
+                                             >‹</span
+                                        >
+                                   </button>
+                                   <button
+                                        id="story-tap-next"
+                                        type="button"
+                                        class="bumble-tap-zone is-next"
+                                        aria-label="Next story card"
+                                   >
+                                        <span
+                                             class="bumble-chevron"
+                                             aria-hidden="true"
+                                             >›</span
+                                        >
+                                   </button>
                               </div>
                          </article>
                     </section>
@@ -1904,8 +1976,8 @@
                </aside>
           </div>
 
-          <script src="story-frames.js?v=4" defer></script>
-          <script src="app.js?v=4" defer></script>
+          <script src="story-frames.js?v=4.1" defer></script>
+          <script src="app.js?v=4.1" defer></script>
      </body>
 </html>
 

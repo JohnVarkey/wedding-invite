@@ -207,152 +207,22 @@ function updateScrollProgress(slideIdx) {
           frame.classList.toggle("is-complete", ratio >= 0.995);
 }
 
-// 3. Through Our Eyes — Interactive Photobook & Shared Reactions (#story)
+// 3. Through Our Eyes — Bumble-Style Cards & Cloud Pop-ups (#story)
+var advanceFromStoryDeck = null;
 
 function renderStoryPhotobook(animateText) {
-     var stackEl = document.getElementById("polaroid-stack");
-     var pillsEl = document.getElementById("story-frame-pills");
-     if (!stackEl || !pillsEl) return;
+     var barsEl = document.getElementById("story-bars");
+     var introEl = document.getElementById("story-intro-view");
+     var photoEl = document.getElementById("story-photo-view");
+     var tapPrev = document.getElementById("story-tap-prev");
+     var tapNext = document.getElementById("story-tap-next");
+     if (!barsEl || !introEl || !photoEl) return;
 
      var total = STORY_FRAMES.length;
-     var isMobile = window.innerWidth < 720;
-     stackEl.innerHTML = "";
+     var cur = STORY_FRAMES[storyFrameIndex] || STORY_FRAMES[0];
 
-     for (var offset = total - 1; offset >= 0; offset--) {
-          var idx = (storyFrameIndex + offset) % total;
-          var item = STORY_FRAMES[idx];
-          var card = document.createElement("div");
-          card.className =
-               "polaroid-card" +
-               (offset === 0 && storyFrameFlipped
-                    ? " is-flipped"
-                    : "");
-
-          var rot = isMobile
-               ? offset === 0
-                    ? -0.6
-                    : offset % 2 === 1
-                      ? 1.6
-                      : -1.6
-               : offset === 0
-                 ? -1.5
-                 : offset % 2 === 1
-                   ? 3.2 + offset
-                   : -3.2 - offset;
-          var tx = isMobile ? offset * 2 : offset * 6;
-          var ty = isMobile ? offset * 4 : offset * 4;
-          var sc = 1 - offset * (isMobile ? 0.025 : 0.045);
-          var op = offset > 3 ? 0 : 1 - offset * 0.16;
-
-          card.style.zIndex = String(total - offset);
-          card.style.opacity = String(op);
-          if (!(offset === 0 && storyFrameFlipped)) {
-               card.style.transform =
-                    "translate(" +
-                    tx +
-                    "px, " +
-                    ty +
-                    "px) rotate(" +
-                    rot +
-                    "deg) scale(" +
-                    sc +
-                    ")";
-          }
-
-          var mediaHtml = item.imgSrc
-               ? '<img src="' +
-                 item.imgSrc +
-                 '" alt="' +
-                 item.caption +
-                 '" loading="lazy">'
-               : item.svg;
-
-          card.innerHTML =
-               '<div class="polaroid-face">' +
-               '<div class="polaroid-tape"></div>' +
-               '<div class="polaroid-window" style="background:' +
-               item.bg +
-               ';">' +
-               mediaHtml +
-               "</div>" +
-               '<div class="polaroid-caption-row">' +
-               '<span class="polaroid-caption-text">' +
-               item.caption +
-               "</span>" +
-               '<span class="polaroid-caption-num">0' +
-               (idx + 1) +
-               "</span>" +
-               "</div>" +
-               "</div>" +
-               '<div class="polaroid-face is-back">' +
-               '<div class="polaroid-back-meta">' +
-               "<span>Back of Print • 0" +
-               (idx + 1) +
-               "</span>" +
-               "<span>" +
-               item.tag +
-               "</span>" +
-               "</div>" +
-               '<p class="polaroid-back-note">' +
-               item.backNote +
-               "</p>" +
-               '<span class="polaroid-back-hint">Tap to flip back ↻</span>' +
-               "</div>";
-
-          if (offset === 0) {
-               card.addEventListener("click", function () {
-                    if (Date.now() < storySwipeSuppressClickUntil) {
-                         return;
-                    }
-                    if (storyFrameFlipped) {
-                         storyFrameFlipped = false;
-                    } else {
-                         storyFrameIndex =
-                              (storyFrameIndex + 1) % total;
-                    }
-                    renderStoryPhotobook(true);
-                    if (
-                         typeof syncMoviePlayback === "function"
-                    ) {
-                         syncMoviePlayback();
-                    }
-               });
-          }
-          stackEl.appendChild(card);
-     }
-
-     var cur = STORY_FRAMES[storyFrameIndex];
-     var elCounter = document.getElementById(
-          "story-frame-counter",
-     );
-     var elKicker =
-          document.getElementById("story-frame-kicker");
-     var elTitle = document.getElementById("story-frame-title");
-     var elTag = document.getElementById("story-frame-tag");
-     var elJohn = document.getElementById("story-react-john");
-     var elManna = document.getElementById("story-react-manna");
-     var elVerdict = document.getElementById(
-          "story-shared-verdict",
-     );
-     var elSwap = document.getElementById("story-reaction-swap");
-
-     if (elCounter)
-          elCounter.textContent =
-               "0" + (storyFrameIndex + 1) + " / 0" + total;
-     if (elKicker) elKicker.textContent = cur.kicker;
-     if (elTitle) elTitle.textContent = cur.title;
-     if (elTag) elTag.textContent = cur.tag;
-     if (elJohn) elJohn.textContent = cur.john;
-     if (elManna) elManna.textContent = cur.manna;
-     if (elVerdict) elVerdict.textContent = cur.verdict;
-
-     if (animateText && elSwap) {
-          elSwap.classList.remove("is-animating");
-          void elSwap.offsetWidth;
-          elSwap.classList.add("is-animating");
-     }
-
-     pillsEl.innerHTML = "";
+     // Render top segmented story bars
+     barsEl.innerHTML = "";
      STORY_FRAMES.forEach(function (f, i) {
           var b = document.createElement("button");
           b.type = "button";
@@ -361,11 +231,20 @@ function renderStoryPhotobook(animateText) {
                "aria-selected",
                i === storyFrameIndex ? "true" : "false",
           );
+          b.setAttribute(
+               "aria-label",
+               f.type === "intro" ? f.title : f.chip,
+          );
           b.className =
-               "frame-pill-btn" +
-               (i === storyFrameIndex ? " is-active" : "");
-          b.textContent = f.pill;
-          b.addEventListener("click", function () {
+               "bumble-bar" +
+               (i === storyFrameIndex
+                    ? " is-active"
+                    : i < storyFrameIndex
+                      ? " is-seen"
+                      : "");
+          b.innerHTML = '<span class="bumble-bar-fill"></span>';
+          b.addEventListener("click", function (e) {
+               e.stopPropagation();
                storyFrameIndex = i;
                storyFrameFlipped = false;
                renderStoryPhotobook(true);
@@ -373,57 +252,144 @@ function renderStoryPhotobook(animateText) {
                     syncMoviePlayback();
                }
           });
-          pillsEl.appendChild(b);
+          barsEl.appendChild(b);
      });
+
+     if (tapPrev) {
+          tapPrev.classList.toggle("is-disabled", storyFrameIndex <= 0);
+     }
+     if (tapNext) {
+          tapNext.setAttribute(
+               "aria-label",
+               storyFrameIndex >= total - 1
+                    ? "Continue to Travel"
+                    : "Next story card",
+          );
+     }
+
+     if (cur.type === "intro") {
+          introEl.classList.remove("is-hidden");
+          photoEl.classList.add("is-hidden");
+          var elEyebrow = document.getElementById("story-intro-eyebrow");
+          var elIntroTitle = document.getElementById("story-intro-title");
+          var elIntroSub = document.getElementById("story-intro-sub");
+          var elIntroHint = document.getElementById("story-intro-hint");
+          if (elEyebrow) elEyebrow.textContent = cur.eyebrow;
+          if (elIntroTitle) elIntroTitle.textContent = cur.title;
+          if (elIntroSub) elIntroSub.textContent = cur.subtitle;
+          if (elIntroHint) elIntroHint.textContent = cur.hint + " ›";
+          return;
+     }
+
+     introEl.classList.add("is-hidden");
+     photoEl.classList.remove("is-hidden");
+
+     var mediaEl = document.getElementById("story-media");
+     var chipEl = document.getElementById("story-photo-chip");
+     var titleEl = document.getElementById("story-photo-title");
+     var johnEl = document.getElementById("story-react-john");
+     var mannaEl = document.getElementById("story-react-manna");
+     var cloudsEl = document.getElementById("story-clouds");
+     var noteOverlay = document.getElementById("story-note-overlay");
+     var backNoteEl = document.getElementById("story-back-note");
+     var flipBtn = document.getElementById("story-btn-flip");
+
+     if (mediaEl) {
+          mediaEl.style.background = cur.bg || "";
+          mediaEl.innerHTML = cur.imgSrc
+               ? '<img src="' +
+                 cur.imgSrc +
+                 '" alt="' +
+                 cur.title +
+                 '" loading="lazy">'
+               : cur.svg;
+     }
+     if (chipEl) chipEl.textContent = cur.chip;
+     if (titleEl) titleEl.textContent = cur.title;
+     if (johnEl) johnEl.textContent = cur.john;
+     if (mannaEl) mannaEl.textContent = cur.manna;
+     if (backNoteEl) backNoteEl.textContent = cur.backNote || "";
+
+     if (noteOverlay) {
+          noteOverlay.hidden = !storyFrameFlipped;
+     }
+     if (flipBtn) {
+          flipBtn.setAttribute(
+               "aria-pressed",
+               storyFrameFlipped ? "true" : "false",
+          );
+          flipBtn.textContent = storyFrameFlipped ? "Photo ↺" : "Note ↻";
+     }
+
+     if (cloudsEl) {
+          cloudsEl.classList.remove("is-popped");
+          if (animateText !== false) {
+               void cloudsEl.offsetWidth;
+          }
+          cloudsEl.classList.add("is-popped");
+     }
 }
 
 var storySwipeConsumed = false;
 var storySwipeSuppressClickUntil = 0;
 
 function initStoryPhotobook() {
-     renderStoryPhotobook(false);
+     renderStoryPhotobook(true);
      if (storyFramesBound) return;
      storyFramesBound = true;
 
-     var btnPrev = document.getElementById("story-btn-prev");
+     var tapPrev = document.getElementById("story-tap-prev");
+     var tapNext = document.getElementById("story-tap-next");
      var btnFlip = document.getElementById("story-btn-flip");
-     var btnNext = document.getElementById("story-btn-next");
-     var stackEl = document.getElementById("polaroid-stack");
+     var stageEl = document.getElementById("story-bumble-stage");
 
-     if (btnPrev) {
-          btnPrev.addEventListener("click", function () {
-               storyFrameIndex =
-                    (storyFrameIndex - 1 + STORY_FRAMES.length) %
-                    STORY_FRAMES.length;
-               storyFrameFlipped = false;
-               renderStoryPhotobook(true);
+     if (tapPrev) {
+          tapPrev.addEventListener("click", function () {
+               if (Date.now() < storySwipeSuppressClickUntil) return;
+               if (storyFrameFlipped) {
+                    storyFrameFlipped = false;
+                    renderStoryPhotobook(false);
+               } else if (storyFrameIndex > 0) {
+                    storyFrameIndex -= 1;
+                    renderStoryPhotobook(true);
+               }
                if (typeof syncMoviePlayback === "function")
                     syncMoviePlayback();
           });
      }
+
+     if (tapNext) {
+          tapNext.addEventListener("click", function () {
+               if (Date.now() < storySwipeSuppressClickUntil) return;
+               if (storyFrameFlipped) {
+                    storyFrameFlipped = false;
+                    renderStoryPhotobook(false);
+               } else if (storyFrameIndex < STORY_FRAMES.length - 1) {
+                    storyFrameIndex += 1;
+                    renderStoryPhotobook(true);
+               } else if (typeof advanceFromStoryDeck === "function") {
+                    advanceFromStoryDeck();
+                    return;
+               }
+               if (typeof syncMoviePlayback === "function")
+                    syncMoviePlayback();
+          });
+     }
+
      if (btnFlip) {
-          btnFlip.addEventListener("click", function () {
+          btnFlip.addEventListener("click", function (e) {
+               e.stopPropagation();
                storyFrameFlipped = !storyFrameFlipped;
                renderStoryPhotobook(false);
                if (typeof syncMoviePlayback === "function")
                     syncMoviePlayback();
           });
      }
-     if (btnNext) {
-          btnNext.addEventListener("click", function () {
-               storyFrameIndex =
-                    (storyFrameIndex + 1) % STORY_FRAMES.length;
-               storyFrameFlipped = false;
-               renderStoryPhotobook(true);
-               if (typeof syncMoviePlayback === "function")
-                    syncMoviePlayback();
-          });
-     }
 
-     if (stackEl) {
+     if (stageEl) {
           var touchStartX = null;
           var touchStartY = null;
-          stackEl.addEventListener(
+          stageEl.addEventListener(
                "touchstart",
                function (e) {
                     if (e.touches.length !== 1) return;
@@ -433,20 +399,13 @@ function initStoryPhotobook() {
                },
                { passive: true },
           );
-          stackEl.addEventListener(
+          stageEl.addEventListener(
                "touchend",
                function (e) {
-                    if (
-                         touchStartX === null ||
-                         !e.changedTouches.length
-                    )
+                    if (touchStartX === null || !e.changedTouches.length)
                          return;
-                    var dx =
-                         e.changedTouches[0].clientX -
-                         touchStartX;
-                    var dy =
-                         e.changedTouches[0].clientY -
-                         touchStartY;
+                    var dx = e.changedTouches[0].clientX - touchStartX;
+                    var dy = e.changedTouches[0].clientY - touchStartY;
                     touchStartX = null;
                     touchStartY = null;
                     if (
@@ -456,19 +415,21 @@ function initStoryPhotobook() {
                          storySwipeConsumed = true;
                          storySwipeSuppressClickUntil = Date.now() + 360;
                          storyFrameFlipped = false;
-                         storyFrameIndex =
-                              dx < 0
-                                   ? (storyFrameIndex + 1) %
-                                     STORY_FRAMES.length
-                                   : (storyFrameIndex -
-                                          1 +
-                                          STORY_FRAMES.length) %
-                                     STORY_FRAMES.length;
-                         renderStoryPhotobook(true);
-                         if (
-                              typeof syncMoviePlayback ===
-                              "function"
-                         )
+                         if (dx < 0) {
+                              if (storyFrameIndex < STORY_FRAMES.length - 1) {
+                                   storyFrameIndex += 1;
+                                   renderStoryPhotobook(true);
+                              } else if (
+                                   typeof advanceFromStoryDeck === "function"
+                              ) {
+                                   advanceFromStoryDeck();
+                                   return;
+                              }
+                         } else if (storyFrameIndex > 0) {
+                              storyFrameIndex -= 1;
+                              renderStoryPhotobook(true);
+                         }
+                         if (typeof syncMoviePlayback === "function")
                               syncMoviePlayback();
                     }
                },
@@ -1468,7 +1429,11 @@ function setupDeckNavigation() {
           var dwellMs =
                slide.id === "rsvp" && rsvpJustSubmitted
                     ? 2200
-                    : MOVIE_DWELL_MS[slide.id] || 3800;
+                    : slide.id === "story"
+                      ? storyFrameIndex === 0
+                           ? 2600
+                           : 4600
+                      : MOVIE_DWELL_MS[slide.id] || 3800;
 
           var atBottom =
                slide.scrollTop + slide.clientHeight >=
@@ -1527,6 +1492,7 @@ function setupDeckNavigation() {
           }
      }
 
+     advanceFromStoryDeck = advanceFromCurrentSlide;
      syncMoviePlayback = scheduleMovieStep;
 
      toggleMovieAutoPlay = function () {
@@ -2185,22 +2151,16 @@ function setupDeckNavigation() {
                event.key === "ArrowRight"
           ) {
                event.preventDefault();
-               storyFrameIndex = (storyFrameIndex + 1) % STORY_FRAMES.length;
-               storyFrameFlipped = false;
-               renderStoryPhotobook(true);
-               scheduleMovieStep();
+               advanceFromCurrentSlide();
           } else if (
                slide &&
                slide.id === "story" &&
                event.key === "ArrowLeft"
           ) {
                event.preventDefault();
-               storyFrameIndex =
-                    (storyFrameIndex - 1 + STORY_FRAMES.length) %
-                    STORY_FRAMES.length;
-               storyFrameFlipped = false;
-               renderStoryPhotobook(true);
-               scheduleMovieStep();
+               if (storyFrameIndex > 0) {
+                    stepBackFromCurrentSlide();
+               }
           } else if (event.key === "Home") {
                event.preventDefault();
                goToSlide(0, false);
@@ -2612,7 +2572,6 @@ function setupGlassGlint() {
 }
 
 window.addEventListener("DOMContentLoaded", function () {
-     var lastStoryMobile = window.innerWidth < 720;
      initPaletteSwitcher();
      createPetals();
      setupGlassGlint();
@@ -2626,14 +2585,7 @@ window.addEventListener("DOMContentLoaded", function () {
      }
      window.addEventListener(
           "resize",
-          function () {
-               syncInvitationCenterOffset();
-               var nowMobile = window.innerWidth < 720;
-               if (nowMobile !== lastStoryMobile) {
-                    lastStoryMobile = nowMobile;
-                    renderStoryPhotobook(false);
-               }
-          },
+          syncInvitationCenterOffset,
           { passive: true },
      );
      updateScrollProgress(0);
