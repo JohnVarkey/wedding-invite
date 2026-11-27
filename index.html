@@ -905,9 +905,15 @@
         }
 
         .next-chapter-link {
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: inherit;
+            font-size: inherit;
             font-weight: 600;
             color: var(--ink-primary);
             text-decoration: none;
+            cursor: pointer;
             transition: color 0.2s ease;
         }
 
@@ -1791,102 +1797,143 @@
         }
 
         /* ==========================================================================
-           9. CHAPTER III — EDITORIAL CONCIERGE GUIDE (#travel)
+           9. CHAPTER III — MINIMAL TRAVEL & STAYS INSERT (#travel)
            ========================================================================== */
-        .concierge-stream {
-            max-width: 660px;
+        .travel-stationery {
+            max-width: 680px;
             margin: 0 auto;
-            display: flex;
-            flex-direction: column;
+            text-align: center;
+            padding: 8px 4px 4px;
         }
 
-        .concierge-entry {
-            padding: 20px 4px;
+        .travel-heading {
+            font-family: var(--font-serif);
+            font-size: clamp(1.65rem, 3.6vw, 2.2rem);
+            font-weight: 500;
+            color: var(--ink-primary);
+            margin: 0 0 4px;
+            line-height: 1.12;
+        }
+
+        .travel-subline {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 1.02rem;
+            color: var(--ink-muted);
+            margin: 0 auto 20px;
+        }
+
+        .travel-pillars {
+            display: grid;
+            grid-template-columns: 1fr;
+            text-align: left;
+            border-top: 1px solid var(--accent-soft-30);
             border-bottom: 1px solid var(--accent-soft-30);
         }
 
-        .concierge-entry:first-child {
-            padding-top: 6px;
+        @media (min-width: 640px) {
+            .travel-pillars {
+                grid-template-columns: repeat(3, 1fr);
+                text-align: center;
+            }
         }
 
-        .concierge-entry:last-child {
-            border-bottom: none;
-            padding-bottom: 6px;
-        }
-
-        .concierge-head {
+        .travel-pillar {
+            padding: 15px 6px;
             display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
+            align-items: flex-start;
+            gap: 13px;
+            border-bottom: 1px solid var(--accent-soft-18);
         }
 
-        .concierge-icon {
-            width: 32px;
-            height: 32px;
+        .travel-pillar:last-child {
+            border-bottom: none;
+        }
+
+        @media (min-width: 640px) {
+            .travel-pillar {
+                padding: 22px 18px;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                border-bottom: none;
+                border-right: 1px solid var(--accent-soft-18);
+            }
+            .travel-pillar:last-child {
+                border-right: none;
+            }
+        }
+
+        .travel-pillar-icon {
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            background-color: var(--kasavu-gold-tint);
             border: 1px solid var(--border-gold);
+            background-color: var(--kasavu-gold-tint);
+            color: var(--kasavu-gold);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            color: var(--ink-primary);
             flex-shrink: 0;
+            margin-top: 2px;
         }
 
-        .concierge-kicker {
-            display: block;
-            font-size: 0.64rem;
-            font-weight: 700;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: var(--kasavu-gold-deep);
+        @media (min-width: 640px) {
+            .travel-pillar-icon {
+                margin-top: 0;
+            }
         }
 
-        .concierge-title {
+        .travel-pillar-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .travel-pillar-title {
             font-family: var(--font-serif);
-            font-size: clamp(1.38rem, 2.8vw, 1.68rem);
+            font-size: 1.24rem;
             font-weight: 600;
             color: var(--ink-primary);
-            margin: 0;
-            line-height: 1.18;
+            margin: 0 0 7px;
+            line-height: 1.15;
         }
 
-        .concierge-copy {
-            margin: 0 0 10px;
-            font-size: 0.9rem;
+        .travel-stop {
+            margin-bottom: 6px;
+        }
+
+        .travel-stop:last-child {
+            margin-bottom: 0;
+        }
+
+        .travel-stop-place {
+            display: block;
+            font-size: 0.84rem;
+            font-weight: 600;
             color: var(--ink-espresso);
-            line-height: 1.65;
+            line-height: 1.3;
         }
 
-        .botanical-list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
+        .travel-stop-time {
+            display: block;
+            font-size: 0.74rem;
+            color: var(--ink-muted);
+            line-height: 1.35;
         }
 
-        .botanical-list li {
-            position: relative;
-            padding-left: 20px;
-            font-size: 0.86rem;
+        .travel-whisper {
+            margin: 16px auto 0;
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 1.02rem;
             color: var(--ink-body);
-            line-height: 1.55;
+            line-height: 1.45;
         }
 
-        .botanical-list li::before {
-            content: '✦';
-            position: absolute;
-            left: 0;
-            top: 0;
-            color: var(--kasavu-gold-deep);
-            font-size: 0.76rem;
-        }
-
-        .botanical-list strong {
-            color: var(--ink-primary);
+        .travel-whisper a {
+            color: var(--kasavu-gold);
+            text-decoration: underline;
+            text-underline-offset: 3px;
             font-weight: 600;
         }
 
@@ -2062,21 +2109,13 @@
         }
 
         /* ==========================================================================
-           10B. FINAL FAREWELL CARD -> ORIGAMI BIRD FLIGHT (#farewell)
+           10B. RSVP CARD -> ORIGAMI BIRD FLIGHT -> THANK YOU ENDING (#rsvp)
            ========================================================================== */
         .farewell-chapter {
             perspective: 1400px;
         }
 
         .farewell-sheet {
-            min-height: 390px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            background: linear-gradient(155deg, var(--bg-cotton) 58%, var(--kasavu-gold-tint) 100%);
-            border: 1px solid var(--border-gold);
             transform-origin: center center;
         }
 
@@ -2102,6 +2141,7 @@
             height: 100%;
             pointer-events: none;
             opacity: 0;
+            z-index: 4;
             transition: opacity 0.28s ease;
         }
 
@@ -2109,15 +2149,11 @@
             opacity: 0.9;
         }
 
-        .farewell-card-copy {
-            position: relative;
-            z-index: 2;
-            max-width: 480px;
-            margin: 0 auto;
+        .rsvp-letter-wrap {
             transition: opacity 0.28s ease, transform 0.36s ease;
         }
 
-        .farewell-chapter.is-folding .farewell-card-copy {
+        .farewell-chapter.is-folding .rsvp-letter-wrap {
             opacity: 0;
             transform: scale(0.92);
         }
@@ -2137,7 +2173,7 @@
             font-size: clamp(1.12rem, 2.4vw, 1.32rem);
             color: var(--ink-body);
             margin: 0 auto 18px;
-            max-width: 420px;
+            max-width: 440px;
             line-height: 1.55;
         }
 
@@ -2153,13 +2189,17 @@
         .farewell-after {
             display: none;
             width: 100%;
-            max-width: 520px;
+            max-width: 780px;
+            min-height: 360px;
             margin: 0 auto;
             flex-shrink: 0;
-            padding: 32px 24px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 36px 26px 26px;
             text-align: center;
-            background-color: var(--bg-cotton);
-            border: 1px solid var(--border-card);
+            background: linear-gradient(155deg, var(--bg-cotton) 58%, var(--kasavu-gold-tint) 100%);
+            border: 1px solid var(--border-gold);
             border-radius: 18px;
             box-shadow: 0 12px 30px var(--shadow-ink);
             opacity: 0;
@@ -2168,7 +2208,7 @@
         }
 
         .farewell-chapter.is-flown .farewell-after {
-            display: block;
+            display: flex;
         }
 
         .farewell-chapter.is-post-visible .farewell-after {
@@ -2177,33 +2217,18 @@
         }
 
         .farewell-after-actions {
+            width: 100%;
+            max-width: 420px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 18px;
-            margin-top: 18px;
+            margin-top: 22px;
             padding-top: 14px;
             border-top: 1px solid var(--accent-soft-30);
             font-size: 0.78rem;
         }
 
-        .farewell-replay-btn {
-            background: none;
-            border: none;
-            color: var(--kasavu-gold-deep);
-            font-family: var(--font-sans);
-            font-size: 0.78rem;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 0;
-            transition: color 0.2s ease;
-        }
-
-        .farewell-replay-btn:hover {
-            color: var(--ink-primary);
-        }
-
-        /* Full-viewport layer inside #farewell so the origami bird can soar freely */
+        /* Full-viewport layer inside #rsvp so the origami bird can soar freely */
         .origami-flight-layer {
             position: fixed;
             inset: 0;
@@ -3129,61 +3154,93 @@
                  ================================================================= -->
             <section id="travel" class="album-chapter">
                 <article class="editorial-sheet">
-                    <div class="concierge-stream">
-                        <!-- Arrival & Local Transit -->
-                        <div class="concierge-entry">
-                            <div class="concierge-head">
-                                <div class="concierge-icon" aria-hidden="true">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <div class="travel-stationery">
+                        <h3 class="travel-heading">Join Us in Kerala</h3>
+                        <p class="travel-subline">Kundara for the Engagement · Chengaroor for the Wedding</p>
+
+                        <div class="travel-pillars">
+                            <!-- By Air -->
+                            <div class="travel-pillar">
+                                <div class="travel-pillar-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
                                     </svg>
                                 </div>
-                                <div>
-                                    <span class="concierge-kicker">Getting Here</span>
-                                    <h3 class="concierge-title">Arrival &amp; Local Transit</h3>
+                                <div class="travel-pillar-body">
+                                    <h4 class="travel-pillar-title">By Air</h4>
+                                    <div class="travel-stop">
+                                        <span class="travel-stop-place">Trivandrum (TRV)</span>
+                                        <span class="travel-stop-time">~1.5h to Kundara</span>
+                                    </div>
+                                    <div class="travel-stop">
+                                        <span class="travel-stop-place">Cochin (COK)</span>
+                                        <span class="travel-stop-time">~2.5h to Chengaroor</span>
+                                    </div>
                                 </div>
                             </div>
-                            <p class="concierge-copy">
-                                Our celebrations span Kundara (Kollam) for the Engagement and Chengaroor (near Thiruvalla &amp; Mallappally) for the Wedding, both easily reached by air, rail, and road.
-                            </p>
-                            <ul class="botanical-list">
-                                <li><strong>Airports:</strong> Trivandrum International Airport (TRV, ~1.5–2 hrs to Kundara; ~3 hrs to Chengaroor) and Cochin International Airport (COK, ~2.5–3 hrs to Chengaroor) offer frequent domestic and Gulf connections.</li>
-                                <li><strong>By Rail:</strong> <strong>Kundara</strong> (KUV) and <strong>Kollam Junction</strong> (QLN, ~25 mins) serve the Engagement venue; <strong>Thiruvalla Railway Station</strong> (TRVL, ~25 mins) is the nearest railhead to Chengaroor Church.</li>
-                                <li><strong>Local Transfers:</strong> Airport pickups and cab coordination between Kundara, Thiruvalla, and Chengaroor are available on request—share your arrival plans in your RSVP note.</li>
-                            </ul>
-                        </div>
 
-                        <!-- Hospitality & Lodging -->
-                        <div class="concierge-entry">
-                            <div class="concierge-head">
-                                <div class="concierge-icon" aria-hidden="true">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <!-- By Rail -->
+                            <div class="travel-pillar">
+                                <div class="travel-pillar-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="6" y="3" width="12" height="14" rx="3"/>
+                                        <path d="M6 11h12M9 21l-2 0M17 21l-2 0M9 17l-2 4M15 17l2 4"/>
+                                        <circle cx="9.5" cy="14" r="0.8" fill="currentColor"/>
+                                        <circle cx="14.5" cy="14" r="0.8" fill="currentColor"/>
+                                    </svg>
+                                </div>
+                                <div class="travel-pillar-body">
+                                    <h4 class="travel-pillar-title">By Rail</h4>
+                                    <div class="travel-stop">
+                                        <span class="travel-stop-place">Kollam (QLN)</span>
+                                        <span class="travel-stop-time">~25m to Engagement</span>
+                                    </div>
+                                    <div class="travel-stop">
+                                        <span class="travel-stop-place">Thiruvalla (TRVL)</span>
+                                        <span class="travel-stop-time">~25m to Wedding</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nearby Stays -->
+                            <div class="travel-pillar">
+                                <div class="travel-pillar-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z"/>
                                     </svg>
                                 </div>
-                                <div>
-                                    <span class="concierge-kicker">Hospitality &amp; Lodging</span>
-                                    <h3 class="concierge-title">Recommended Stays</h3>
+                                <div class="travel-pillar-body">
+                                    <h4 class="travel-pillar-title">Nearby Stays</h4>
+                                    <div class="travel-stop">
+                                        <span class="travel-stop-place">Kollam &amp; Ashtamudi</span>
+                                        <span class="travel-stop-time">Lakeside &amp; town hotels</span>
+                                    </div>
+                                    <div class="travel-stop">
+                                        <span class="travel-stop-place">Thiruvalla &amp; Mallappally</span>
+                                        <span class="travel-stop-time">Boutique &amp; heritage stays</span>
+                                    </div>
                                 </div>
                             </div>
-                            <p class="concierge-copy">
-                                Whether you are joining us in Kundara, Chengaroor, or for the full week of celebrations, warm Kerala hospitality and comfortable town or lakeside stays are nearby.
-                            </p>
-                            <ul class="botanical-list">
-                                <li><strong>Engagement (Kundara &amp; Kollam):</strong> Ashtamudi lakeside resorts and modern town hotels in Kollam sit 20–25 minutes from YMCA Auditorium, Arumurikkada.</li>
-                                <li><strong>Wedding (Thiruvalla &amp; Mallappally):</strong> Boutique town hotels and quiet riverside heritage homes across Thiruvalla and Mallappally are 15–30 minutes from St George Orthodox Church, Chengaroor.</li>
-                                <li><strong>Stay Assistance:</strong> Let us know your check-in dates and guest count when you RSVP—our families will gladly share nearby stay options and help arrange rooms.</li>
-                            </ul>
                         </div>
+
+                        <p class="travel-whisper">
+                            Need airport pickups or room recommendations? Let us know in your <a href="#rsvp">RSVP</a>.
+                        </p>
                     </div>
                 </article>
             </section>
 
             <!-- =================================================================
-                 KINDLY RESPOND (#rsvp)
+                 KINDLY RESPOND -> FOLDS INTO ORIGAMI BIRD & REVEALS THANK YOU (#rsvp)
                  ================================================================= -->
-            <section id="rsvp" class="album-chapter">
-                <article class="editorial-sheet">
+            <section id="rsvp" class="album-chapter farewell-chapter">
+                <article id="rsvp-sheet" class="editorial-sheet farewell-sheet">
+                    <svg class="origami-creases" viewBox="0 0 820 420" preserveAspectRatio="none" aria-hidden="true">
+                        <line x1="0" y1="0" x2="820" y2="420" stroke="var(--kasavu-gold)" stroke-width="1" stroke-dasharray="6 6"/>
+                        <line x1="820" y1="0" x2="0" y2="420" stroke="var(--kasavu-gold)" stroke-width="1" stroke-dasharray="6 6"/>
+                        <line x1="410" y1="0" x2="410" y2="420" stroke="var(--accent-soft-55)" stroke-width="1" stroke-dasharray="5 5"/>
+                        <line x1="0" y1="210" x2="820" y2="210" stroke="var(--accent-soft-40)" stroke-width="1" stroke-dasharray="5 5"/>
+                    </svg>
                     <div class="rsvp-letter-wrap">
                         <div class="rsvp-seal-header">
                             <svg width="54" height="54" viewBox="0 0 88 88" fill="none" style="display: block; margin: 0 auto 6px;" aria-hidden="true">
@@ -3195,7 +3252,7 @@
                             </svg>
 
                             <p class="rsvp-letter-quote">
-                                “We would love to celebrate with you in Kerala.”
+                                “We would love to celebrate with you.”
                             </p>
                             <p class="chapter-lead">
                                 Kindly respond by May 31, 2027 so we can welcome you warmly.
@@ -3258,57 +3315,31 @@
                         <!-- Album Colophon Footer -->
                         <footer class="album-colophon">
                             <p class="colophon-line">M &amp; J • July 12, 2027 • Kerala</p>
-                            <a href="#farewell" class="next-chapter-link">Continue ↓</a>
+                            <button type="button" class="next-chapter-link" onclick="triggerRsvpOrigami(0)">Continue ↓</button>
                         </footer>
                     </div>
                 </article>
-            </section>
 
-            <!-- =================================================================
-                 FINAL FAREWELL CARD -> FOLDS INTO ORIGAMI BIRD & FLIES AWAY (#farewell)
-                 ================================================================= -->
-            <section id="farewell" class="album-chapter farewell-chapter">
-                <article id="farewell-sheet" class="editorial-sheet farewell-sheet">
-                    <svg class="origami-creases" viewBox="0 0 820 420" preserveAspectRatio="none" aria-hidden="true">
-                        <line x1="0" y1="0" x2="820" y2="420" stroke="var(--kasavu-gold)" stroke-width="1" stroke-dasharray="6 6"/>
-                        <line x1="820" y1="0" x2="0" y2="420" stroke="var(--kasavu-gold)" stroke-width="1" stroke-dasharray="6 6"/>
-                        <line x1="410" y1="0" x2="410" y2="420" stroke="var(--accent-soft-55)" stroke-width="1" stroke-dasharray="5 5"/>
-                        <line x1="0" y1="210" x2="820" y2="210" stroke="var(--accent-soft-40)" stroke-width="1" stroke-dasharray="5 5"/>
-                    </svg>
-                    <div class="farewell-card-copy">
-                        <span class="chapter-eyebrow" style="margin-bottom: 10px;">With Love &amp; Gratitude</span>
-                        <h2 id="farewell-title" class="farewell-title">Thank You</h2>
-                        <p id="farewell-copy" class="farewell-copy">
-                            We are truly looking forward to celebrating with you in Kerala.
-                        </p>
-                        <div class="lotus-divider" aria-hidden="true">
-                            <span></span>
-                            <svg width="54" height="22" viewBox="0 0 54 22" fill="none">
-                                <path d="M27 3 C23 9, 23 15, 27 19 C31 15, 31 9, 27 3 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
-                                <path d="M21 7 C16 10, 15 15, 19 18 C22 16, 23 11, 21 7 Z" fill="var(--bg-surface)" stroke="var(--kasavu-gold)" stroke-width="1.1"/>
-                                <path d="M33 7 C38 10, 39 15, 35 18 C32 16, 31 11, 33 7 Z" fill="var(--bg-surface)" stroke="var(--kasavu-gold)" stroke-width="1.1"/>
-                                <circle cx="11" cy="14" r="2" fill="var(--kasavu-gold)"/>
-                                <circle cx="43" cy="14" r="2" fill="var(--kasavu-gold)"/>
-                            </svg>
-                            <span></span>
-                        </div>
-                        <span class="farewell-signoff">Manna &amp; John • July 12, 2027</span>
-                    </div>
-                </article>
-
-                <!-- Serene Post-Flight Keepsake Note -->
+                <!-- Ending Thank You Card (Revealed After RSVP Origami Flies Away) -->
                 <div id="farewell-after" class="farewell-after">
-                    <span class="scripture-ornament" style="display: block; margin-bottom: 8px;" aria-hidden="true">✦</span>
-                    <h2 id="post-flight-title" class="farewell-title" style="font-size: clamp(1.55rem, 3.4vw, 2.05rem); margin-bottom: 8px;">
-                        Looking Forward to Celebrating With You
-                    </h2>
-                    <p id="post-flight-copy" class="farewell-copy" style="margin-bottom: 0;">
-                        Manna &amp; John • July 12, 2027 • Kerala
+                    <span class="chapter-eyebrow" style="margin-bottom: 10px;">With Love &amp; Gratitude</span>
+                    <h2 id="farewell-title" class="farewell-title">Thank You</h2>
+                    <p id="farewell-copy" class="farewell-copy">
+                        We are truly looking forward to celebrating with you at the start of a new chapter in our lives.
                     </p>
+                    <div class="lotus-divider" aria-hidden="true">
+                        <span></span>
+                        <svg width="54" height="22" viewBox="0 0 54 22" fill="none">
+                            <path d="M27 3 C23 9, 23 15, 27 19 C31 15, 31 9, 27 3 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-width="1.2"/>
+                            <path d="M21 7 C16 10, 15 15, 19 18 C22 16, 23 11, 21 7 Z" fill="var(--bg-surface)" stroke="var(--kasavu-gold)" stroke-width="1.1"/>
+                            <path d="M33 7 C38 10, 39 15, 35 18 C32 16, 31 11, 33 7 Z" fill="var(--bg-surface)" stroke="var(--kasavu-gold)" stroke-width="1.1"/>
+                            <circle cx="11" cy="14" r="2" fill="var(--kasavu-gold)"/>
+                            <circle cx="43" cy="14" r="2" fill="var(--kasavu-gold)"/>
+                        </svg>
+                        <span></span>
+                    </div>
+                    <span id="farewell-signoff" class="farewell-signoff">Manna &amp; John • July 12, 2027 • Kerala</span>
                     <div class="farewell-after-actions">
-                        <button type="button" class="farewell-replay-btn" onclick="replayFarewellOrigami()">
-                            ↻ Replay
-                        </button>
                         <a href="#cover" class="next-chapter-link">↑ Back to Cover</a>
                     </div>
                 </div>
@@ -3470,11 +3501,16 @@
         // 2. 4-Sided Viewport Border Progress (driven by active card, no downward scroll)
         var activeSlideIndex = 0;
 
+        var rsvpOrigamiStarted = false;
+        var rsvpOrigamiCompleted = false;
+
         function updateScrollProgress(slideIdx) {
             var slides = document.querySelectorAll('.album-chapter');
             var total = slides.length;
             var idx = typeof slideIdx === 'number' ? slideIdx : activeSlideIndex;
-            var ratio = total > 1 ? Math.min(1, Math.max(0, idx / (total - 1))) : 1;
+            var ratio = total > 0
+                ? ((idx >= total - 1 && rsvpOrigamiCompleted) ? 1 : Math.min(1, Math.max(0, idx / total)))
+                : 1;
 
             var seg = 1 / 3;
             var rightPct = Math.min(100, Math.max(0, (ratio / seg) * 100));
@@ -3671,6 +3707,21 @@
         function stopStoryRoute() {
             clearRouteTimers();
             routeCycleToken += 1;
+            var sheet = document.getElementById('story-sheet');
+            if (sheet) sheet.classList.remove('is-heart-ready');
+            ['plane-dubai', 'plane-kuwait', 'vehicle-car'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.setAttribute('opacity', '0');
+            });
+            ['path-flight-dubai', 'path-flight-kuwait', 'path-road-to-tvm', 'path-heart-left', 'path-heart-right'].forEach(function(id) {
+                var p = document.getElementById(id);
+                if (p && typeof p.getTotalLength === 'function') {
+                    var len = p.getTotalLength();
+                    p.style.strokeDasharray = len;
+                    p.style.strokeDashoffset = len;
+                }
+            });
+            setActiveStop('origins');
         }
 
         // 4. Live Countdown to the Wedding (Monday, July 12, 2027)
@@ -3708,79 +3759,92 @@
         function syncFarewellCopy() {
             var farewellTitle = document.getElementById('farewell-title');
             var farewellCopy = document.getElementById('farewell-copy');
-            var postFlightTitle = document.getElementById('post-flight-title');
-            var postFlightCopy = document.getElementById('post-flight-copy');
+            var farewellSignoff = document.getElementById('farewell-signoff');
 
             if (farewellTitle) {
                 farewellTitle.textContent = rsvpGuestName ? ('Thank You, ' + rsvpGuestName) : 'Thank You';
             }
             if (farewellCopy) {
                 farewellCopy.textContent = rsvpGuestAttending
-                    ? 'We are truly looking forward to celebrating with you in Kerala.'
+                    ? 'We are truly looking forward to celebrating with you at the start of a new chapter in our lives.'
                     : 'We carry your warm wishes with us as we begin our life together.';
             }
-            if (postFlightTitle) {
-                postFlightTitle.textContent = rsvpGuestAttending
-                    ? 'Looking Forward to Celebrating With You'
-                    : 'Thank You for Your Warm Wishes';
-            }
-            if (postFlightCopy) {
-                postFlightCopy.textContent = 'Manna & John • July 12, 2027 • Kerala';
+            if (farewellSignoff) {
+                farewellSignoff.textContent = 'Manna & John • July 12, 2027 • Kerala';
             }
         }
 
         function resetFarewellStage() {
             clearFarewellTimers();
-            var farewell = document.getElementById('farewell');
+            rsvpOrigamiStarted = false;
+            rsvpOrigamiCompleted = false;
+            var rsvpChapter = document.getElementById('rsvp');
             var flightLayer = document.getElementById('origami-flight-layer');
-            if (farewell) {
-                farewell.classList.remove('is-folding', 'is-flown', 'is-post-visible');
+            if (rsvpChapter) {
+                rsvpChapter.classList.remove('is-folding', 'is-flown', 'is-post-visible');
             }
             if (flightLayer) {
                 flightLayer.classList.remove('is-active', 'is-folding', 'is-flying');
             }
             syncFarewellCopy();
+            updateScrollProgress(activeSlideIndex);
         }
 
-        function startFarewellOrigamiSequence(initialDelayMs) {
-            resetFarewellStage();
-
-            var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            if (reducedMotion) return;
-
-            var farewell = document.getElementById('farewell');
-            var farewellSheet = document.getElementById('farewell-sheet');
+        function triggerRsvpOrigami(initialDelayMs) {
+            var rsvpChapter = document.getElementById('rsvp');
+            var rsvpSheet = document.getElementById('rsvp-sheet');
             var flightLayer = document.getElementById('origami-flight-layer');
             var birdAnchor = document.getElementById('origami-bird-anchor');
-            if (!farewell || !farewellSheet || !flightLayer) return;
+            if (!rsvpChapter || !rsvpSheet || rsvpOrigamiStarted) return;
 
-            var holdDelay = typeof initialDelayMs === 'number' ? initialDelayMs : 1100;
+            syncFarewellCopy();
+            rsvpOrigamiStarted = true;
+            clearFarewellTimers();
 
-            // Phase 1: Fold the entire farewell card into the origami bird
-            farewellTimers.push(setTimeout(function() {
-                if (!farewell.classList.contains('is-active')) return;
+            var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (reducedMotion || !flightLayer) {
+                rsvpOrigamiCompleted = true;
+                rsvpChapter.classList.add('is-flown', 'is-post-visible');
+                updateScrollProgress(activeSlideIndex);
+                syncMoviePlayback();
+                return;
+            }
+
+            var holdDelay = typeof initialDelayMs === 'number' ? initialDelayMs : 0;
+
+            function beginFold() {
+                if (!rsvpChapter.classList.contains('is-active')) {
+                    resetFarewellStage();
+                    return;
+                }
                 if (birdAnchor) {
-                    var rect = farewellSheet.getBoundingClientRect();
+                    var rect = rsvpSheet.getBoundingClientRect();
+                    var visibleTop = Math.max(0, rect.top);
+                    var visibleBottom = Math.min(window.innerHeight, rect.bottom);
                     birdAnchor.style.left = Math.round(rect.left + rect.width * 0.5) + 'px';
-                    birdAnchor.style.top = Math.round(rect.top + rect.height * 0.5) + 'px';
+                    birdAnchor.style.top = Math.round((visibleTop + visibleBottom) * 0.5) + 'px';
                 }
                 flightLayer.classList.add('is-active');
                 requestAnimationFrame(function() {
-                    farewell.classList.add('is-folding');
+                    rsvpChapter.classList.add('is-folding');
                     flightLayer.classList.add('is-folding');
                 });
 
                 // Phase 2: Wings flap & origami bird flies away
                 farewellTimers.push(setTimeout(function() {
-                    if (!farewell.classList.contains('is-active')) return;
+                    if (!rsvpChapter.classList.contains('is-active')) return;
                     flightLayer.classList.add('is-flying');
 
-                    // Phase 3: Reveal serene post-flight keepsake note
+                    // Phase 3: Reveal ending Thank You card
                     farewellTimers.push(setTimeout(function() {
-                        if (!farewell.classList.contains('is-active')) return;
-                        farewell.classList.add('is-flown');
+                        if (!rsvpChapter.classList.contains('is-active')) return;
+                        rsvpChapter.classList.add('is-flown');
+                        rsvpChapter.scrollTop = 0;
                         requestAnimationFrame(function() {
-                            farewell.classList.add('is-post-visible');
+                            rsvpChapter.classList.add('is-post-visible');
+                            rsvpOrigamiCompleted = true;
+                            updateScrollProgress(activeSlideIndex);
+                            syncMoviePlayback();
                         });
                     }, 1050));
 
@@ -3789,20 +3853,13 @@
                         flightLayer.classList.remove('is-active', 'is-folding', 'is-flying');
                     }, 1950));
                 }, 580));
-            }, holdDelay));
-        }
+            }
 
-        function replayFarewellOrigami() {
-            var farewell = document.getElementById('farewell');
-            if (!farewell) return;
-            resetFarewellStage();
-            farewell.classList.remove('is-shown');
-            requestAnimationFrame(function() {
-                requestAnimationFrame(function() {
-                    farewell.classList.add('is-shown');
-                    startFarewellOrigamiSequence(950);
-                });
-            });
+            if (holdDelay > 0) {
+                farewellTimers.push(setTimeout(beginFold, holdDelay));
+            } else {
+                beginFold();
+            }
         }
 
         var syncMoviePlayback = function() {};
@@ -4004,6 +4061,31 @@
             }
             sheet.classList.add('is-unblurred');
             syncInvitationTimer();
+        }
+
+        function resetInvitationStage() {
+            if (invitationTimer) {
+                clearTimeout(invitationTimer);
+                invitationTimer = null;
+            }
+            if (invitationDetailsTimer) {
+                clearTimeout(invitationDetailsTimer);
+                invitationDetailsTimer = null;
+            }
+            invitationRevealed = false;
+            invitationDetailsShown = false;
+            invitationHolding = false;
+            invitationRemainingMs = VERSE_READ_DELAY_MS;
+            invitationDetailsRemainingMs = DETAILS_READ_DELAY_MS;
+
+            var sheet = document.getElementById('invitation-sheet');
+            if (sheet) {
+                sheet.classList.remove('is-unblurred', 'is-details-shown');
+                var fullEl = sheet.querySelector('.invite-names-full');
+                var shortEl = sheet.querySelector('.invite-names-short');
+                if (fullEl) fullEl.setAttribute('aria-hidden', 'false');
+                if (shortEl) shortEl.setAttribute('aria-hidden', 'true');
+            }
         }
 
         function syncInvitationTimer() {
@@ -4244,6 +4326,44 @@
                 }
             }
 
+            function canAdvanceFromSlide(idx) {
+                if (idx < slides.length - 1) return true;
+                var slide = slides[idx];
+                return !!(slide && slide.id === 'rsvp' && !rsvpOrigamiStarted);
+            }
+
+            function canStepBackFromSlide(idx) {
+                var slide = slides[idx];
+                if (slide && slide.id === 'rsvp' && rsvpOrigamiStarted) return true;
+                return idx > 0;
+            }
+
+            function advanceFromCurrentSlide() {
+                if (activeSlideIndex < slides.length - 1) {
+                    goToSlide(activeSlideIndex + 1, false);
+                } else if (slides[activeSlideIndex] && slides[activeSlideIndex].id === 'rsvp' && !rsvpOrigamiStarted) {
+                    wheelLockUntil = Date.now() + 700;
+                    wheelAccum = 0;
+                    setSlideMotionBusy(false);
+                    triggerRsvpOrigami(0);
+                }
+            }
+
+            function stepBackFromCurrentSlide() {
+                var slide = slides[activeSlideIndex];
+                if (slide && slide.id === 'rsvp' && rsvpOrigamiStarted) {
+                    wheelLockUntil = Date.now() + 520;
+                    wheelAccum = 0;
+                    resetFarewellStage();
+                    setSlideMotionBusy(false);
+                    scheduleMovieStep();
+                    return;
+                }
+                if (activeSlideIndex > 0) {
+                    goToSlide(activeSlideIndex - 1, true);
+                }
+            }
+
             function scheduleMovieStep() {
                 clearMovieTimers();
                 updateMovieToggleUI();
@@ -4258,16 +4378,17 @@
                 if (!slide) return;
 
                 if (activeSlideIndex >= slides.length - 1) {
-                    if (!movieRepeatEnabled) return;
-                    var farewellEl = document.getElementById('farewell');
-                    var repeatWaitMs = (farewellEl && farewellEl.classList.contains('is-post-visible')) ? 2200 : 5000;
-                    movieTimer = setTimeout(function() {
-                        movieTimer = null;
-                        if (!movieUserPaused && movieRepeatEnabled && !isTransitioning && !isAlbumOpening && !isTouching) {
-                            goToSlide(0, false);
-                        }
-                    }, repeatWaitMs);
-                    return;
+                    if (slide.id === 'rsvp' && rsvpOrigamiStarted) {
+                        if (!rsvpOrigamiCompleted || !movieRepeatEnabled) return;
+                        movieTimer = setTimeout(function() {
+                            movieTimer = null;
+                            if (!movieUserPaused && movieRepeatEnabled && !isTransitioning && !isAlbumOpening && !isTouching) {
+                                goToSlide(0, false);
+                            }
+                        }, 2600);
+                        return;
+                    }
+                    if (!(slide.id === 'rsvp' && !rsvpOrigamiStarted)) return;
                 }
 
                 if (slide.id === 'invitation' && (!invitationRevealed || !invitationDetailsShown)) return;
@@ -4293,7 +4414,7 @@
                         movieTimer = setTimeout(function() {
                             movieTimer = null;
                             if (!movieUserPaused && !isTransitioning && !isAlbumOpening && !isTouching && !isRsvpEditing()) {
-                                goToSlide(activeSlideIndex + 1, false);
+                                advanceFromCurrentSlide();
                             }
                         }, secondHalf);
                     }, firstHalf);
@@ -4301,7 +4422,7 @@
                     movieTimer = setTimeout(function() {
                         movieTimer = null;
                         if (!movieUserPaused && !isTransitioning && !isAlbumOpening && !isTouching && !isRsvpEditing()) {
-                            goToSlide(activeSlideIndex + 1, false);
+                            advanceFromCurrentSlide();
                         }
                     }, dwellMs);
                 }
@@ -4333,7 +4454,7 @@
                 updateMovieToggleUI();
                 if (movieRepeatEnabled) {
                     scheduleMovieStep();
-                } else if (activeSlideIndex >= slides.length - 1) {
+                } else if (activeSlideIndex >= slides.length - 1 && rsvpOrigamiCompleted) {
                     clearMovieTimers();
                 }
             };
@@ -4377,7 +4498,7 @@
                 } else {
                     stopStoryRoute();
                 }
-                if (slides[idx] && slides[idx].id === 'farewell') {
+                if (slides[idx] && slides[idx].id === 'rsvp') {
                     resetFarewellStage();
                 } else {
                     clearFarewellTimers();
@@ -4422,8 +4543,6 @@
                         rsvpJustSubmitted = false;
                         movieFormPaused = false;
                         movieFormManualOverride = false;
-                    }
-                    if (fromSlide.id === 'farewell') {
                         clearFarewellTimers();
                         var fl = document.getElementById('origami-flight-layer');
                         if (fl) fl.classList.remove('is-active', 'is-folding', 'is-flying');
@@ -4435,14 +4554,24 @@
                             var schedOut = document.getElementById('schedule-sheet');
                             if (schedOut) schedOut.classList.remove('is-timeline-active');
                         }
-                        if (fromSlide.id === 'farewell') {
+                        if (fromSlide.id === 'rsvp') {
                             resetFarewellStage();
                         }
                     }, fromSlide.id === 'cover' ? 340 : 280);
                 }
 
-                if (toSlide.id === 'farewell') {
+                if (toSlide.id === 'schedule') {
+                    var schedReset = document.getElementById('schedule-sheet');
+                    if (schedReset) schedReset.classList.remove('is-timeline-active');
+                }
+                if (toSlide.id === 'story') {
+                    stopStoryRoute();
+                }
+                if (toSlide.id === 'rsvp') {
                     resetFarewellStage();
+                }
+                if (toSlide.id === 'cover') {
+                    closeAlbumCover(0);
                 }
 
                 toSlide.classList.remove('is-leaving', 'is-shown');
@@ -4465,9 +4594,6 @@
                         }
                         if (toSlide.id === 'story') {
                             startStoryRoute(260);
-                        }
-                        if (toSlide.id === 'farewell') {
-                            startFarewellOrigamiSequence(1100);
                         }
                     });
                 });
@@ -4579,8 +4705,9 @@
                     rsvpJustSubmitted = false;
                     movieFormPaused = false;
                     movieFormManualOverride = false;
+                    resetInvitationStage();
+                    closeAlbumCover(0);
                     transitionBetweenSlides(activeSlideIndex, 0, false);
-                    closeAlbumCover(90);
                     return;
                 }
 
@@ -4628,10 +4755,10 @@
                 if (wheelResetTimer) clearTimeout(wheelResetTimer);
                 wheelResetTimer = setTimeout(function() { wheelAccum = 0; }, 120);
 
-                if (wheelAccum >= 18 && activeSlideIndex < slides.length - 1) {
-                    goToSlide(activeSlideIndex + 1, false);
-                } else if (wheelAccum <= -18 && activeSlideIndex > 0) {
-                    goToSlide(activeSlideIndex - 1, true);
+                if (wheelAccum >= 18 && canAdvanceFromSlide(activeSlideIndex)) {
+                    advanceFromCurrentSlide();
+                } else if (wheelAccum <= -18 && canStepBackFromSlide(activeSlideIndex)) {
+                    stepBackFromCurrentSlide();
                 } else {
                     scheduleMovieStep();
                 }
@@ -4663,8 +4790,8 @@
                     return;
                 }
                 var moveDelta = touchStartY - event.touches[0].clientY;
-                if ((touchStartAtBottom && moveDelta > 1 && touchStartIdx < slides.length - 1) ||
-                    (touchStartAtTop && moveDelta < -1 && touchStartIdx > 0)) {
+                if ((touchStartAtBottom && moveDelta > 1 && canAdvanceFromSlide(touchStartIdx)) ||
+                    (touchStartAtTop && moveDelta < -1 && canStepBackFromSlide(touchStartIdx))) {
                     if (event.cancelable) {
                         event.preventDefault();
                     }
@@ -4690,22 +4817,22 @@
                 var isTall = isSlideTall(slide);
 
                 if (!isTall) {
-                    if (delta > 36 && touchStartIdx < slides.length - 1) {
-                        goToSlide(touchStartIdx + 1, false);
+                    if (delta > 36 && canAdvanceFromSlide(touchStartIdx)) {
+                        advanceFromCurrentSlide();
                         return;
-                    } else if (delta < -36 && touchStartIdx > 0) {
-                        goToSlide(touchStartIdx - 1, true);
+                    } else if (delta < -36 && canStepBackFromSlide(touchStartIdx)) {
+                        stepBackFromCurrentSlide();
                         return;
                     }
                 } else {
                     var scrollMoved = Math.abs(slide.scrollTop - touchStartScrollTop);
                     var endAtBottom = isSlideAtBottom(slide, 14);
                     var endAtTop = isSlideAtTop(slide, 14);
-                    if ((touchStartAtBottom || endAtBottom) && scrollMoved < 20 && delta > 36 && touchStartIdx < slides.length - 1) {
-                        goToSlide(touchStartIdx + 1, false);
+                    if ((touchStartAtBottom || endAtBottom) && scrollMoved < 20 && delta > 36 && canAdvanceFromSlide(touchStartIdx)) {
+                        advanceFromCurrentSlide();
                         return;
-                    } else if ((touchStartAtTop || endAtTop) && scrollMoved < 20 && delta < -36 && touchStartIdx > 0) {
-                        goToSlide(touchStartIdx - 1, true);
+                    } else if ((touchStartAtTop || endAtTop) && scrollMoved < 20 && delta < -36 && canStepBackFromSlide(touchStartIdx)) {
+                        stepBackFromCurrentSlide();
                         return;
                     }
                 }
@@ -4737,9 +4864,9 @@
                         scheduleMovieStep();
                         return;
                     }
-                    if (activeSlideIndex < slides.length - 1) {
+                    if (canAdvanceFromSlide(activeSlideIndex)) {
                         event.preventDefault();
-                        goToSlide(activeSlideIndex + 1, false);
+                        advanceFromCurrentSlide();
                     }
                 } else if (event.key === 'ArrowUp' || event.key === 'PageUp' || (event.key === ' ' && event.shiftKey)) {
                     if (isTall && slide.scrollTop > 4) {
@@ -4747,16 +4874,20 @@
                         scheduleMovieStep();
                         return;
                     }
-                    if (activeSlideIndex > 0) {
+                    if (canStepBackFromSlide(activeSlideIndex)) {
                         event.preventDefault();
-                        goToSlide(activeSlideIndex - 1, true);
+                        stepBackFromCurrentSlide();
                     }
                 } else if (event.key === 'Home') {
                     event.preventDefault();
                     goToSlide(0, false);
                 } else if (event.key === 'End') {
                     event.preventDefault();
-                    goToSlide(slides.length - 1, false);
+                    if (activeSlideIndex < slides.length - 1) {
+                        goToSlide(slides.length - 1, false);
+                    } else {
+                        advanceFromCurrentSlide();
+                    }
                 }
             });
 
@@ -4939,9 +5070,15 @@
                 startMusicPlayer();
             }
 
+            var lastWheelUnlockAt = 0;
             function unlockMusicOnGesture(event) {
                 if (!musicEnabled || musicActuallyPlaying || musicUnavailable || document.hidden) return;
                 if (event.target && event.target.closest && event.target.closest('#music-toggle-btn')) return;
+                if (event.type === 'wheel') {
+                    var now = Date.now();
+                    if (now - lastWheelUnlockAt < 500) return;
+                    lastWheelUnlockAt = now;
+                }
                 musicAwaitingGesture = false;
                 startMusicPlayer();
             }
@@ -4950,6 +5087,7 @@
             window.addEventListener('touchend', unlockMusicOnGesture, { passive: true });
             window.addEventListener('click', unlockMusicOnGesture, { passive: true });
             window.addEventListener('keydown', unlockMusicOnGesture, { passive: true });
+            window.addEventListener('wheel', unlockMusicOnGesture, { passive: true });
 
             document.addEventListener('visibilitychange', function() {
                 if (document.hidden) {
