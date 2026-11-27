@@ -4,7 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#29351D">
     <title>Manna &amp; John — Our Wedding Story | July 2027</title>
+    <meta name="description" content="Together with their families, Manna Ann Mariyam &amp; John Koodarathil Varkey joyfully invite you to celebrate their union in Holy Matrimony on July 12, 2027 in Kerala.">
+
+    <!-- Site Stamp Logo / Favicon & Touch Icon -->
+    <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
+    <link rel="icon" type="image/png" sizes="180x180" href="public/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="public/apple-touch-icon.png">
+
+    <!-- WhatsApp / Social Link Preview (Open Graph) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Manna &amp; John — Wedding Invitation | July 12, 2027">
+    <meta property="og:description" content="Together with their families, Manna &amp; John joyfully invite you to celebrate their union in Holy Matrimony on July 12, 2027 in Kerala.">
+    <meta property="og:url" content="https://johnvarkey.github.io/wedding-invite/">
+    <meta property="og:image" content="https://johnvarkey.github.io/wedding-invite/public/og-preview.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Manna &amp; John — Wedding Invitation | July 12, 2027">
+    <meta name="twitter:description" content="Together with their families, Manna &amp; John joyfully invite you to celebrate their union in Holy Matrimony on July 12, 2027 in Kerala.">
+    <meta name="twitter:image" content="https://johnvarkey.github.io/wedding-invite/public/og-preview.png">
 
     <!-- Editorial Serif & Clean Sans Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2470,33 +2491,11 @@
                 text-align: center;
             }
             .palette-switcher {
-                right: 10px;
-                bottom: 10px;
-            }
-            .palette-trigger {
-                padding: 7px 10px;
-                gap: 6px;
-                font-size: 0.69rem;
-                max-width: calc(100vw - 208px);
-            }
-            #palette-trigger-label {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-            .bottom-left-dock {
-                left: 10px;
-                bottom: 10px;
-                padding: 3px;
-                gap: 2px;
-            }
-            .dock-toggle-btn {
-                padding: 5px 8px;
-                font-size: 0.67rem;
-                gap: 4px;
+                right: 12px;
+                bottom: 12px;
             }
             .palette-menu {
-                width: min(290px, calc(100vw - 20px));
+                width: min(296px, calc(100vw - 24px));
             }
         }
 
@@ -2651,17 +2650,18 @@
         .palette-trigger {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 13px;
+            justify-content: center;
+            gap: 7px;
+            padding: 8px 11px;
             border-radius: 999px;
             border: 1px solid var(--border-gold);
             background-color: var(--header-bg);
             color: var(--ink-primary);
             font-family: var(--font-sans);
-            font-size: 0.73rem;
+            font-size: 0.72rem;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 8px 22px rgba(24, 24, 20, 0.14);
+            box-shadow: 0 8px 22px rgba(24, 24, 20, 0.18);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             transition: background-color 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
@@ -2672,47 +2672,54 @@
         }
 
         .palette-trigger:active {
-            transform: scale(0.98);
+            transform: scale(0.96);
         }
 
-        .bottom-left-dock {
-            position: fixed;
-            left: 16px;
-            bottom: 16px;
-            z-index: 70;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            padding: 3px;
-            border-radius: 999px;
-            border: 1px solid var(--border-gold);
-            background-color: var(--header-bg);
-            box-shadow: 0 8px 22px rgba(24, 24, 20, 0.14);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        .palette-section-label {
+            display: block;
+            font-size: 0.59rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--ink-muted);
+            padding: 6px 8px 4px;
+        }
+
+        .playback-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 5px;
+            padding: 2px 4px 6px;
+        }
+
+        .palette-divider {
+            height: 1px;
+            background-color: var(--accent-soft-30);
+            margin: 2px 4px 2px;
         }
 
         .dock-toggle-btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 5px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid transparent;
+            padding: 8px 6px;
+            border-radius: 10px;
+            border: 1px solid var(--border-card);
             background-color: transparent;
             color: var(--ink-muted);
             font-family: var(--font-sans);
             font-size: 0.7rem;
             font-weight: 700;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.02em;
             cursor: pointer;
             line-height: 1.1;
-            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
         }
 
         .dock-toggle-btn:hover {
             color: var(--ink-primary);
-            background-color: var(--kasavu-gold-tint);
+            background-color: var(--bg-linen);
         }
 
         .dock-toggle-btn:active {
@@ -3381,44 +3388,47 @@
             <source src="public/music.m4a" type="audio/mp4">
         </audio>
 
-        <!-- Bottom-Left Playback Controls (Music, Auto, Repeat) -->
-        <div id="bottom-left-dock" class="bottom-left-dock" role="group" aria-label="Playback controls">
-            <button type="button" id="music-toggle-btn" class="dock-toggle-btn is-active" onclick="toggleMusicPlayback()" aria-pressed="true" aria-label="Music On — click to mute" title="Music: On (Can't Help Falling in Love - David Bay)">
-                <svg id="music-toggle-svg-on" class="dock-btn-svg music-note-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M9 18V5l11-2v13"/>
-                    <circle cx="6" cy="18" r="3"/>
-                    <circle cx="17" cy="16" r="3"/>
-                </svg>
-                <svg id="music-toggle-svg-off" class="dock-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
-                    <path d="M9 18V5l11-2v13"/>
-                    <circle cx="6" cy="18" r="3"/>
-                    <circle cx="17" cy="16" r="3"/>
-                    <line x1="3" y1="3" x2="21" y2="21"/>
-                </svg>
-                <span id="music-toggle-label">Music</span>
-            </button>
-            <button type="button" id="movie-toggle-btn" class="dock-toggle-btn is-active" onclick="toggleMovieAutoPlay()" aria-pressed="true" aria-label="Auto advance On — click to pause" title="Auto advance: On">
-                <span id="movie-toggle-icon" aria-hidden="true">❚❚</span>
-                <span id="movie-toggle-label">Auto</span>
-            </button>
-            <button type="button" id="repeat-toggle-btn" class="dock-toggle-btn" onclick="toggleMovieRepeat()" aria-pressed="false" aria-label="Repeat slideshow Off — click to repeat" title="Repeat slideshow: Off">
-                <svg class="dock-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="17 1 21 5 17 9"/>
-                    <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                    <polyline points="7 23 3 19 7 15"/>
-                    <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-                </svg>
-                <span id="repeat-toggle-label">Repeat</span>
-            </button>
-        </div>
-
-        <!-- Live Palette Preview Switcher -->
-        <aside id="palette-switcher" class="palette-switcher" aria-label="Color palette preview">
-            <div id="palette-menu" class="palette-menu" role="listbox" aria-label="Choose color palette">
+        <!-- Unified Minimized Settings & Playback Switcher -->
+        <aside id="palette-switcher" class="palette-switcher" aria-label="Playback and theme settings">
+            <div id="palette-menu" class="palette-menu" role="dialog" aria-label="Playback and theme settings">
                 <div class="palette-menu-head">
-                    <span class="palette-menu-title">Colour Palettes</span>
-                    <button type="button" class="palette-menu-close" onclick="togglePaletteMenu(false)" aria-label="Close palette menu">✕</button>
+                    <span class="palette-menu-title">Settings</span>
+                    <button type="button" class="palette-menu-close" onclick="togglePaletteMenu(false)" aria-label="Close settings menu">✕</button>
                 </div>
+
+                <span class="palette-section-label">Playback</span>
+                <div class="playback-grid" role="group" aria-label="Playback controls">
+                    <button type="button" id="music-toggle-btn" class="dock-toggle-btn is-active" onclick="toggleMusicPlayback()" aria-pressed="true" aria-label="Music On — click to mute" title="Music: On (Can't Help Falling in Love - David Bay)">
+                        <svg id="music-toggle-svg-on" class="dock-btn-svg music-note-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M9 18V5l11-2v13"/>
+                            <circle cx="6" cy="18" r="3"/>
+                            <circle cx="17" cy="16" r="3"/>
+                        </svg>
+                        <svg id="music-toggle-svg-off" class="dock-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                            <path d="M9 18V5l11-2v13"/>
+                            <circle cx="6" cy="18" r="3"/>
+                            <circle cx="17" cy="16" r="3"/>
+                            <line x1="3" y1="3" x2="21" y2="21"/>
+                        </svg>
+                        <span id="music-toggle-label">Music</span>
+                    </button>
+                    <button type="button" id="movie-toggle-btn" class="dock-toggle-btn is-active" onclick="toggleMovieAutoPlay()" aria-pressed="true" aria-label="Auto advance On — click to pause" title="Auto advance: On">
+                        <span id="movie-toggle-icon" aria-hidden="true">❚❚</span>
+                        <span id="movie-toggle-label">Auto</span>
+                    </button>
+                    <button type="button" id="repeat-toggle-btn" class="dock-toggle-btn" onclick="toggleMovieRepeat()" aria-pressed="false" aria-label="Repeat slideshow Off — click to repeat" title="Repeat slideshow: Off">
+                        <svg class="dock-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="17 1 21 5 17 9"/>
+                            <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                            <polyline points="7 23 3 19 7 15"/>
+                            <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                        </svg>
+                        <span id="repeat-toggle-label">Repeat</span>
+                    </button>
+                </div>
+
+                <div class="palette-divider" aria-hidden="true"></div>
+                <span class="palette-section-label">Colour Palette</span>
 
                 <button type="button" class="palette-option is-selected" data-palette-choice="olive-gold" onclick="setPalette('olive-gold')" role="option" aria-selected="true">
                     <span class="palette-swatches" aria-hidden="true">
@@ -3460,13 +3470,19 @@
                 </button>
             </div>
 
-            <button type="button" id="palette-trigger" class="palette-trigger" onclick="togglePaletteMenu()" aria-expanded="false" aria-controls="palette-menu">
+            <button type="button" id="palette-trigger" class="palette-trigger" onclick="togglePaletteMenu()" aria-expanded="false" aria-controls="palette-menu" aria-label="Open playback and palette settings" title="Settings &amp; Palette (Dark Olive &amp; Gold)">
                 <span class="palette-swatches" aria-hidden="true">
                     <span id="active-dot-primary" class="palette-swatch-dot" style="background: #29351D;"></span>
                     <span id="active-dot-accent" class="palette-swatch-dot" style="background: #D4B46A;"></span>
                 </span>
-                <span id="palette-trigger-label">Palette: Dark Olive &amp; Gold</span>
-                <span aria-hidden="true">▾</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="4" y1="6" x2="20" y2="6"/>
+                    <line x1="4" y1="12" x2="20" y2="12"/>
+                    <line x1="4" y1="18" x2="20" y2="18"/>
+                    <circle cx="9" cy="6" r="2.2" fill="var(--header-bg)"/>
+                    <circle cx="15" cy="12" r="2.2" fill="var(--header-bg)"/>
+                    <circle cx="10" cy="18" r="2.2" fill="var(--header-bg)"/>
+                </svg>
             </button>
         </aside>
     </div>
@@ -3927,10 +3943,10 @@
 
             document.documentElement.setAttribute('data-palette', paletteId);
 
-            var labelEl = document.getElementById('palette-trigger-label');
+            var triggerEl = document.getElementById('palette-trigger');
             var dotPrimary = document.getElementById('active-dot-primary');
             var dotAccent = document.getElementById('active-dot-accent');
-            if (labelEl) labelEl.textContent = 'Palette: ' + meta.label;
+            if (triggerEl) triggerEl.setAttribute('title', 'Settings & Palette (' + meta.label + ')');
             if (dotPrimary) dotPrimary.style.background = meta.primary;
             if (dotAccent) dotAccent.style.background = meta.accent;
 
