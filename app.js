@@ -1140,11 +1140,6 @@ var PALETTES = {
           primary: "#29351D",
           accent: "#D4B46A",
      },
-     "olive-ivory": {
-          label: "Deep Olive & Ivory",
-          primary: "#2D3822",
-          accent: "#EAE2CC",
-     },
      "olive-champagne": {
           label: "Forest Olive & Champagne",
           primary: "#24311D",
