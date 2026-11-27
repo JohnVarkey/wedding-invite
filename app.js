@@ -1,0 +1,2642 @@
+var storyFrameIndex = 0;
+var storyFrameFlipped = false;
+var storyFramesBound = false;
+
+// 1. Ambient Drifting Jasmine Petals + Scroll Breeze Physics
+var petalRate = 1;
+var petalTargetRate = 1;
+var petalBurstCooldownUntil = 0;
+var petalBreezeRaf = null;
+var petalHoldUntil = 0;
+
+function createSinglePetalElement(isBurst) {
+     var petal = document.createElement("div");
+     petal.className = isBurst
+          ? "jasmine-petal is-burst"
+          : "jasmine-petal";
+     petal.style.left = Math.random() * 96 + "vw";
+     if (isBurst) {
+          petal.style.animationDuration =
+               6.8 + Math.random() * 2.4 + "s";
+          petal.style.animationDelay = "0s";
+     } else {
+          petal.style.animationDuration =
+               14 + Math.random() * 10 + "s";
+          petal.style.animationDelay =
+               -(Math.random() * 16) + "s";
+     }
+     var size = 12 + Math.round(Math.random() * 6);
+     petal.innerHTML =
+          '<svg width="' +
+          size +
+          '" height="' +
+          size +
+          '" viewBox="0 0 24 24" fill="none">' +
+          '<path d="M12 3C7 8 7 16 12 21C17 16 17 8 12 3Z" fill="var(--petal-fill)" fill-opacity="0.92" stroke="var(--petal-stroke)" stroke-width="1"/>' +
+          "</svg>";
+     return petal;
+}
+
+function setAllPetalsPlaybackRate(rate) {
+     var layer = document.getElementById("petals-layer");
+     if (!layer) return;
+     var items = layer.querySelectorAll(".jasmine-petal");
+     for (var i = 0; i < items.length; i++) {
+          var el = items[i];
+          if (typeof el.getAnimations === "function") {
+               var anims = el.getAnimations();
+               for (var j = 0; j < anims.length; j++) {
+                    try {
+                         if (
+                              typeof anims[j]
+                                   .updatePlaybackRate ===
+                              "function"
+                         ) {
+                              anims[j].updatePlaybackRate(rate);
+                         } else {
+                              anims[j].playbackRate = rate;
+                         }
+                    } catch (e) {}
+               }
+          }
+     }
+}
+
+function spawnBurstPetals(count) {
+     var layer = document.getElementById("petals-layer");
+     if (!layer) return;
+     var existingBursts = layer.querySelectorAll(
+          ".jasmine-petal.is-burst",
+     );
+     if (existingBursts.length >= 10) return;
+     var toAdd = Math.min(count, 10 - existingBursts.length);
+     for (var i = 0; i < toAdd; i++) {
+          var petal = createSinglePetalElement(true);
+          layer.appendChild(petal);
+          (function (p) {
+               var removeDone = function () {
+                    if (p && p.parentNode)
+                         p.parentNode.removeChild(p);
+               };
+               p.addEventListener("animationend", removeDone, {
+                    once: true,
+               });
+               setTimeout(removeDone, 11500);
+          })(petal);
+     }
+     setAllPetalsPlaybackRate(petalRate);
+}
+
+function stepPetalBreeze() {
+     var now = Date.now();
+     if (now > petalHoldUntil) {
+          petalTargetRate += (1 - petalTargetRate) * 0.085;
+     }
+     petalRate += (petalTargetRate - petalRate) * 0.22;
+
+     setAllPetalsPlaybackRate(petalRate);
+
+     if (
+          Math.abs(petalRate - 1) > 0.015 ||
+          Math.abs(petalTargetRate - 1) > 0.015 ||
+          now <= petalHoldUntil
+     ) {
+          petalBreezeRaf =
+               requestAnimationFrame(stepPetalBreeze);
+     } else {
+          petalRate = 1;
+          petalTargetRate = 1;
+          setAllPetalsPlaybackRate(1);
+          petalBreezeRaf = null;
+     }
+}
+
+function applyPetalScrollImpulse(deltaY) {
+     if (
+          !deltaY ||
+          (window.matchMedia &&
+               window.matchMedia(
+                    "(prefers-reduced-motion: reduce)",
+               ).matches)
+     )
+          return;
+     var now = Date.now();
+     petalHoldUntil = now + 150;
+
+     if (deltaY > 0) {
+          var boost = Math.min(
+               2.2,
+               1.35 + Math.abs(deltaY) * 0.011,
+          );
+          petalTargetRate = Math.max(petalTargetRate, boost);
+          if (now > petalBurstCooldownUntil) {
+               petalBurstCooldownUntil = now + 260;
+               spawnBurstPetals(Math.abs(deltaY) > 40 ? 2 : 1);
+          }
+     } else {
+          var slow = Math.max(
+               0.24,
+               0.48 - Math.min(0.24, Math.abs(deltaY) * 0.004),
+          );
+          petalTargetRate = Math.min(petalTargetRate, slow);
+     }
+
+     if (!petalBreezeRaf) {
+          petalBreezeRaf =
+               requestAnimationFrame(stepPetalBreeze);
+     }
+}
+
+function createPetals() {
+     var layer = document.getElementById("petals-layer");
+     if (!layer) return;
+     layer.innerHTML = "";
+
+     for (var i = 0; i < 12; i++) {
+          layer.appendChild(createSinglePetalElement(false));
+     }
+}
+
+// 2. 4-Sided Viewport Border Progress (driven by active card, no downward scroll)
+var activeSlideIndex = 0;
+
+var rsvpOrigamiStarted = false;
+var rsvpOrigamiCompleted = false;
+
+function updateScrollProgress(slideIdx) {
+     var slides = document.querySelectorAll(".album-chapter");
+     var total = slides.length;
+     var idx =
+          typeof slideIdx === "number"
+               ? slideIdx
+               : activeSlideIndex;
+     var ratio =
+          total > 0
+               ? idx >= total - 1 && rsvpOrigamiCompleted
+                    ? 1
+                    : Math.min(1, Math.max(0, idx / total))
+               : 1;
+
+     var seg = 1 / 3;
+     var rightPct = Math.min(
+          100,
+          Math.max(0, (ratio / seg) * 100),
+     );
+     var bottomPct = Math.min(
+          100,
+          Math.max(0, ((ratio - seg) / seg) * 100),
+     );
+     var leftPct = Math.min(
+          100,
+          Math.max(0, ((ratio - seg * 2) / seg) * 100),
+     );
+
+     var elTop = document.getElementById("edge-top");
+     var elRight = document.getElementById("edge-right");
+     var elBottom = document.getElementById("edge-bottom");
+     var elLeft = document.getElementById("edge-left");
+     var frame = document.getElementById("page-progress-frame");
+
+     if (elTop) elTop.style.width = "100%";
+     if (elRight)
+          elRight.style.height = rightPct.toFixed(2) + "%";
+     if (elBottom)
+          elBottom.style.width = bottomPct.toFixed(2) + "%";
+     if (elLeft) elLeft.style.height = leftPct.toFixed(2) + "%";
+     if (frame)
+          frame.classList.toggle("is-complete", ratio >= 0.995);
+}
+
+// 3. Through Our Eyes — Interactive Photobook & Shared Reactions (#story)
+
+function renderStoryPhotobook(animateText) {
+     var stackEl = document.getElementById("polaroid-stack");
+     var pillsEl = document.getElementById("story-frame-pills");
+     if (!stackEl || !pillsEl) return;
+
+     var total = STORY_FRAMES.length;
+     var isMobile = window.innerWidth < 720;
+     stackEl.innerHTML = "";
+
+     for (var offset = total - 1; offset >= 0; offset--) {
+          var idx = (storyFrameIndex + offset) % total;
+          var item = STORY_FRAMES[idx];
+          var card = document.createElement("div");
+          card.className =
+               "polaroid-card" +
+               (offset === 0 && storyFrameFlipped
+                    ? " is-flipped"
+                    : "");
+
+          var rot = isMobile
+               ? offset === 0
+                    ? -0.6
+                    : offset % 2 === 1
+                      ? 1.6
+                      : -1.6
+               : offset === 0
+                 ? -1.5
+                 : offset % 2 === 1
+                   ? 3.2 + offset
+                   : -3.2 - offset;
+          var tx = isMobile ? offset * 2 : offset * 6;
+          var ty = isMobile ? offset * 4 : offset * 4;
+          var sc = 1 - offset * (isMobile ? 0.025 : 0.045);
+          var op = offset > 3 ? 0 : 1 - offset * 0.16;
+
+          card.style.zIndex = String(total - offset);
+          card.style.opacity = String(op);
+          if (!(offset === 0 && storyFrameFlipped)) {
+               card.style.transform =
+                    "translate(" +
+                    tx +
+                    "px, " +
+                    ty +
+                    "px) rotate(" +
+                    rot +
+                    "deg) scale(" +
+                    sc +
+                    ")";
+          }
+
+          var mediaHtml = item.imgSrc
+               ? '<img src="' +
+                 item.imgSrc +
+                 '" alt="' +
+                 item.caption +
+                 '" loading="lazy">'
+               : item.svg;
+
+          card.innerHTML =
+               '<div class="polaroid-face">' +
+               '<div class="polaroid-tape"></div>' +
+               '<div class="polaroid-window" style="background:' +
+               item.bg +
+               ';">' +
+               mediaHtml +
+               "</div>" +
+               '<div class="polaroid-caption-row">' +
+               '<span class="polaroid-caption-text">' +
+               item.caption +
+               "</span>" +
+               '<span class="polaroid-caption-num">0' +
+               (idx + 1) +
+               "</span>" +
+               "</div>" +
+               "</div>" +
+               '<div class="polaroid-face is-back">' +
+               '<div class="polaroid-back-meta">' +
+               "<span>Back of Print • 0" +
+               (idx + 1) +
+               "</span>" +
+               "<span>" +
+               item.tag +
+               "</span>" +
+               "</div>" +
+               '<p class="polaroid-back-note">' +
+               item.backNote +
+               "</p>" +
+               '<span class="polaroid-back-hint">Tap to flip back ↻</span>' +
+               "</div>";
+
+          if (offset === 0) {
+               card.addEventListener("click", function () {
+                    if (Date.now() < storySwipeSuppressClickUntil) {
+                         return;
+                    }
+                    if (storyFrameFlipped) {
+                         storyFrameFlipped = false;
+                    } else {
+                         storyFrameIndex =
+                              (storyFrameIndex + 1) % total;
+                    }
+                    renderStoryPhotobook(true);
+                    if (
+                         typeof syncMoviePlayback === "function"
+                    ) {
+                         syncMoviePlayback();
+                    }
+               });
+          }
+          stackEl.appendChild(card);
+     }
+
+     var cur = STORY_FRAMES[storyFrameIndex];
+     var elCounter = document.getElementById(
+          "story-frame-counter",
+     );
+     var elKicker =
+          document.getElementById("story-frame-kicker");
+     var elTitle = document.getElementById("story-frame-title");
+     var elTag = document.getElementById("story-frame-tag");
+     var elJohn = document.getElementById("story-react-john");
+     var elManna = document.getElementById("story-react-manna");
+     var elVerdict = document.getElementById(
+          "story-shared-verdict",
+     );
+     var elSwap = document.getElementById("story-reaction-swap");
+
+     if (elCounter)
+          elCounter.textContent =
+               "0" + (storyFrameIndex + 1) + " / 0" + total;
+     if (elKicker) elKicker.textContent = cur.kicker;
+     if (elTitle) elTitle.textContent = cur.title;
+     if (elTag) elTag.textContent = cur.tag;
+     if (elJohn) elJohn.textContent = cur.john;
+     if (elManna) elManna.textContent = cur.manna;
+     if (elVerdict) elVerdict.textContent = cur.verdict;
+
+     if (animateText && elSwap) {
+          elSwap.classList.remove("is-animating");
+          void elSwap.offsetWidth;
+          elSwap.classList.add("is-animating");
+     }
+
+     pillsEl.innerHTML = "";
+     STORY_FRAMES.forEach(function (f, i) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.setAttribute("role", "tab");
+          b.setAttribute(
+               "aria-selected",
+               i === storyFrameIndex ? "true" : "false",
+          );
+          b.className =
+               "frame-pill-btn" +
+               (i === storyFrameIndex ? " is-active" : "");
+          b.textContent = f.pill;
+          b.addEventListener("click", function () {
+               storyFrameIndex = i;
+               storyFrameFlipped = false;
+               renderStoryPhotobook(true);
+               if (typeof syncMoviePlayback === "function") {
+                    syncMoviePlayback();
+               }
+          });
+          pillsEl.appendChild(b);
+     });
+}
+
+var storySwipeConsumed = false;
+var storySwipeSuppressClickUntil = 0;
+
+function initStoryPhotobook() {
+     renderStoryPhotobook(false);
+     if (storyFramesBound) return;
+     storyFramesBound = true;
+
+     var btnPrev = document.getElementById("story-btn-prev");
+     var btnFlip = document.getElementById("story-btn-flip");
+     var btnNext = document.getElementById("story-btn-next");
+     var stackEl = document.getElementById("polaroid-stack");
+
+     if (btnPrev) {
+          btnPrev.addEventListener("click", function () {
+               storyFrameIndex =
+                    (storyFrameIndex - 1 + STORY_FRAMES.length) %
+                    STORY_FRAMES.length;
+               storyFrameFlipped = false;
+               renderStoryPhotobook(true);
+               if (typeof syncMoviePlayback === "function")
+                    syncMoviePlayback();
+          });
+     }
+     if (btnFlip) {
+          btnFlip.addEventListener("click", function () {
+               storyFrameFlipped = !storyFrameFlipped;
+               renderStoryPhotobook(false);
+               if (typeof syncMoviePlayback === "function")
+                    syncMoviePlayback();
+          });
+     }
+     if (btnNext) {
+          btnNext.addEventListener("click", function () {
+               storyFrameIndex =
+                    (storyFrameIndex + 1) % STORY_FRAMES.length;
+               storyFrameFlipped = false;
+               renderStoryPhotobook(true);
+               if (typeof syncMoviePlayback === "function")
+                    syncMoviePlayback();
+          });
+     }
+
+     if (stackEl) {
+          var touchStartX = null;
+          var touchStartY = null;
+          stackEl.addEventListener(
+               "touchstart",
+               function (e) {
+                    if (e.touches.length !== 1) return;
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    storySwipeConsumed = false;
+               },
+               { passive: true },
+          );
+          stackEl.addEventListener(
+               "touchend",
+               function (e) {
+                    if (
+                         touchStartX === null ||
+                         !e.changedTouches.length
+                    )
+                         return;
+                    var dx =
+                         e.changedTouches[0].clientX -
+                         touchStartX;
+                    var dy =
+                         e.changedTouches[0].clientY -
+                         touchStartY;
+                    touchStartX = null;
+                    touchStartY = null;
+                    if (
+                         Math.abs(dx) > 32 &&
+                         Math.abs(dx) > Math.abs(dy) * 1.15
+                    ) {
+                         storySwipeConsumed = true;
+                         storySwipeSuppressClickUntil = Date.now() + 360;
+                         storyFrameFlipped = false;
+                         storyFrameIndex =
+                              dx < 0
+                                   ? (storyFrameIndex + 1) %
+                                     STORY_FRAMES.length
+                                   : (storyFrameIndex -
+                                          1 +
+                                          STORY_FRAMES.length) %
+                                     STORY_FRAMES.length;
+                         renderStoryPhotobook(true);
+                         if (
+                              typeof syncMoviePlayback ===
+                              "function"
+                         )
+                              syncMoviePlayback();
+                    }
+               },
+               { passive: true },
+          );
+     }
+}
+
+function enterStoryChapter(fromBottom) {
+     storyFrameIndex = fromBottom ? STORY_FRAMES.length - 1 : 0;
+     storyFrameFlipped = false;
+     renderStoryPhotobook(false);
+}
+
+function resetStoryChapter() {
+     storyFrameFlipped = false;
+}
+
+function stepStoryFrame(delta) {
+     var next = storyFrameIndex + delta;
+     if (next < 0 || next >= STORY_FRAMES.length) return false;
+     storyFrameIndex = next;
+     storyFrameFlipped = false;
+     renderStoryPhotobook(true);
+     return true;
+}
+
+// 4. Live Countdown to the Wedding (Monday, July 12, 2027)
+function updateCountdown() {
+     var targetTime = new Date(
+          "2027-07-12T10:30:00+05:30",
+     ).getTime();
+     var diff = Math.max(0, targetTime - Date.now());
+
+     var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+     var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+     var mins = Math.floor((diff / (1000 * 60)) % 60);
+     var secs = Math.floor((diff / 1000) % 60);
+
+     var elDays = document.getElementById("cd-days");
+     var elHours = document.getElementById("cd-hours");
+     var elMins = document.getElementById("cd-mins");
+     var elSecs = document.getElementById("cd-secs");
+
+     if (elDays) elDays.textContent = days;
+     if (elHours)
+          elHours.textContent = String(hours).padStart(2, "0");
+     if (elMins)
+          elMins.textContent = String(mins).padStart(2, "0");
+     if (elSecs)
+          elSecs.textContent = String(secs).padStart(2, "0");
+}
+
+// 5. Interactive Keepsake RSVP Confirmation & Final Farewell Origami Card
+var farewellTimers = [];
+var rsvpGuestName = "";
+var rsvpGuestAttending = true;
+
+function clearFarewellTimers() {
+     while (farewellTimers.length) {
+          clearTimeout(farewellTimers.pop());
+     }
+}
+
+function syncFarewellCopy() {
+     var farewellTitle =
+          document.getElementById("farewell-title");
+     var farewellCopy = document.getElementById("farewell-copy");
+     var farewellSignoff =
+          document.getElementById("farewell-signoff");
+
+     if (farewellTitle) {
+          farewellTitle.textContent = rsvpGuestName
+               ? "Thank You, " + rsvpGuestName
+               : "Thank You";
+     }
+     if (farewellCopy) {
+          farewellCopy.textContent = rsvpGuestAttending
+               ? "We are truly looking forward to celebrating with you at the start of a new chapter in our lives."
+               : "We carry your warm wishes with us as we begin our life together.";
+     }
+     if (farewellSignoff) {
+          farewellSignoff.textContent =
+               "Manna & John • July 12, 2027 • Kerala";
+     }
+}
+
+function resetFarewellStage() {
+     clearFarewellTimers();
+     rsvpOrigamiStarted = false;
+     rsvpOrigamiCompleted = false;
+     var rsvpChapter = document.getElementById("rsvp");
+     var flightLayer = document.getElementById(
+          "origami-flight-layer",
+     );
+     if (rsvpChapter) {
+          rsvpChapter.classList.remove(
+               "is-folding",
+               "is-flown",
+               "is-post-visible",
+          );
+     }
+     if (flightLayer) {
+          flightLayer.classList.remove(
+               "is-active",
+               "is-folding",
+               "is-flying",
+          );
+     }
+     syncFarewellCopy();
+     updateScrollProgress(activeSlideIndex);
+}
+
+function triggerRsvpOrigami(initialDelayMs) {
+     var rsvpChapter = document.getElementById("rsvp");
+     var rsvpSheet = document.getElementById("rsvp-sheet");
+     var flightLayer = document.getElementById(
+          "origami-flight-layer",
+     );
+     var birdAnchor = document.getElementById(
+          "origami-bird-anchor",
+     );
+     if (!rsvpChapter || !rsvpSheet || rsvpOrigamiStarted)
+          return;
+
+     syncFarewellCopy();
+     rsvpOrigamiStarted = true;
+     clearFarewellTimers();
+
+     var reducedMotion =
+          window.matchMedia &&
+          window.matchMedia("(prefers-reduced-motion: reduce)")
+               .matches;
+     if (reducedMotion || !flightLayer) {
+          rsvpOrigamiCompleted = true;
+          rsvpChapter.classList.add(
+               "is-flown",
+               "is-post-visible",
+          );
+          updateScrollProgress(activeSlideIndex);
+          syncMoviePlayback();
+          return;
+     }
+
+     var holdDelay =
+          typeof initialDelayMs === "number"
+               ? initialDelayMs
+               : 0;
+
+     function beginFold() {
+          if (!rsvpChapter.classList.contains("is-active")) {
+               resetFarewellStage();
+               return;
+          }
+          if (birdAnchor) {
+               var rect = rsvpSheet.getBoundingClientRect();
+               var visibleTop = Math.max(0, rect.top);
+               var visibleBottom = Math.min(
+                    window.innerHeight,
+                    rect.bottom,
+               );
+               birdAnchor.style.left =
+                    Math.round(rect.left + rect.width * 0.5) +
+                    "px";
+               birdAnchor.style.top =
+                    Math.round(
+                         (visibleTop + visibleBottom) * 0.5,
+                    ) + "px";
+          }
+          flightLayer.classList.add("is-active");
+          requestAnimationFrame(function () {
+               rsvpChapter.classList.add("is-folding");
+               flightLayer.classList.add("is-folding");
+          });
+
+          // Phase 2: Wings flap & origami bird flies away
+          farewellTimers.push(
+               setTimeout(function () {
+                    if (
+                         !rsvpChapter.classList.contains(
+                              "is-active",
+                         )
+                    )
+                         return;
+                    flightLayer.classList.add("is-flying");
+
+                    // Phase 3: Reveal ending Thank You card
+                    farewellTimers.push(
+                         setTimeout(function () {
+                              if (
+                                   !rsvpChapter.classList.contains(
+                                        "is-active",
+                                   )
+                              )
+                                   return;
+                              rsvpChapter.classList.add(
+                                   "is-flown",
+                              );
+                              rsvpChapter.scrollTop = 0;
+                              requestAnimationFrame(function () {
+                                   rsvpChapter.classList.add(
+                                        "is-post-visible",
+                                   );
+                                   rsvpOrigamiCompleted = true;
+                                   updateScrollProgress(
+                                        activeSlideIndex,
+                                   );
+                                   syncMoviePlayback();
+                              });
+                         }, 1050),
+                    );
+
+                    // Clean up flight layer once bird exits sky
+                    farewellTimers.push(
+                         setTimeout(function () {
+                              flightLayer.classList.remove(
+                                   "is-active",
+                                   "is-folding",
+                                   "is-flying",
+                              );
+                         }, 1950),
+                    );
+               }, 580),
+          );
+     }
+
+     if (holdDelay > 0) {
+          farewellTimers.push(setTimeout(beginFold, holdDelay));
+     } else {
+          beginFold();
+     }
+}
+
+var syncMoviePlayback = function () {};
+var toggleMovieAutoPlay = function () {};
+var toggleMovieRepeat = function () {};
+var notifyMovieFormInteraction = function () {};
+var rsvpJustSubmitted = false;
+
+function handleRsvpSubmit(event) {
+     event.preventDefault();
+     var name = document
+          .getElementById("rsvp-name")
+          .value.trim();
+     var attendance =
+          document.getElementById("rsvp-attendance").value;
+     var guests = document.getElementById("rsvp-guests").value;
+     var notes = document
+          .getElementById("rsvp-notes")
+          .value.trim();
+
+     if (!name) return;
+
+     rsvpGuestName = name;
+     rsvpGuestAttending = attendance.indexOf("Wedding") !== -1;
+     syncFarewellCopy();
+
+     var message =
+          "Dearest <strong>" +
+          escapeHtml(name) +
+          "</strong>, we have joyfully recorded your reply for <strong>" +
+          escapeHtml(guests) +
+          "</strong> — <em>" +
+          escapeHtml(attendance) +
+          "</em>.";
+
+     if (notes) {
+          message +=
+               '<br><span style="display:inline-block; margin-top:8px; padding:6px 12px; border-radius:999px; background:var(--bg-cotton); border:1px solid var(--border-chip); color:var(--ink-primary); font-size:0.8rem;">Your Note: ' +
+               escapeHtml(notes) +
+               "</span>";
+     }
+
+     document.getElementById("rsvp-receipt-body").innerHTML =
+          message;
+     document.getElementById("rsvp-form-card").style.display =
+          "none";
+     document
+          .getElementById("rsvp-receipt")
+          .classList.add("is-visible");
+     rsvpJustSubmitted = true;
+     notifyMovieFormInteraction(false);
+     syncMoviePlayback();
+}
+
+function editRsvp() {
+     rsvpJustSubmitted = false;
+     document
+          .getElementById("rsvp-receipt")
+          .classList.remove("is-visible");
+     document.getElementById("rsvp-form-card").style.display =
+          "block";
+     notifyMovieFormInteraction(true);
+}
+
+function escapeHtml(value) {
+     return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+}
+
+// 6. Live Colour Palette Preview Switcher
+var PALETTES = {
+     "olive-gold": {
+          label: "Dark Olive & Gold",
+          primary: "#29351D",
+          accent: "#D4B46A",
+     },
+     "olive-ivory": {
+          label: "Deep Olive & Ivory",
+          primary: "#2D3822",
+          accent: "#EAE2CC",
+     },
+     "olive-champagne": {
+          label: "Forest Olive & Champagne",
+          primary: "#24311D",
+          accent: "#DFC592",
+     },
+};
+var PALETTE_STORAGE_KEY = "mj-wedding-palette-v3";
+
+function applyPaletteState(paletteId, persist) {
+     if (!PALETTES[paletteId]) paletteId = "olive-gold";
+     var meta = PALETTES[paletteId];
+
+     document.documentElement.setAttribute(
+          "data-palette",
+          paletteId,
+     );
+
+     var triggerEl = document.getElementById("palette-trigger");
+     var dotPrimary =
+          document.getElementById("active-dot-primary");
+     var dotAccent =
+          document.getElementById("active-dot-accent");
+     if (triggerEl)
+          triggerEl.setAttribute(
+               "title",
+               "Settings & Palette (" + meta.label + ")",
+          );
+     if (dotPrimary) dotPrimary.style.background = meta.primary;
+     if (dotAccent) dotAccent.style.background = meta.accent;
+
+     var options = document.querySelectorAll(".palette-option");
+     options.forEach(function (btn) {
+          var selected =
+               btn.getAttribute("data-palette-choice") ===
+               paletteId;
+          btn.classList.toggle("is-selected", selected);
+          btn.setAttribute(
+               "aria-selected",
+               selected ? "true" : "false",
+          );
+     });
+
+     if (persist) {
+          try {
+               localStorage.setItem(
+                    PALETTE_STORAGE_KEY,
+                    paletteId,
+               );
+          } catch (e) {}
+          try {
+               var url = new URL(window.location.href);
+               url.searchParams.set("palette", paletteId);
+               window.history.replaceState(
+                    {},
+                    "",
+                    url.toString(),
+               );
+          } catch (e) {}
+     }
+}
+
+function setPalette(paletteId) {
+     applyPaletteState(paletteId, true);
+     togglePaletteMenu(false);
+}
+
+function togglePaletteMenu(forceState) {
+     var switcher = document.getElementById("palette-switcher");
+     var trigger = document.getElementById("palette-trigger");
+     if (!switcher || !trigger) return;
+
+     var nextOpen =
+          typeof forceState === "boolean"
+               ? forceState
+               : !switcher.classList.contains("is-open");
+
+     switcher.classList.toggle("is-open", nextOpen);
+     trigger.setAttribute(
+          "aria-expanded",
+          nextOpen ? "true" : "false",
+     );
+     syncMoviePlayback();
+}
+
+function initPaletteSwitcher() {
+     var initial = "olive-gold";
+     try {
+          var params = new URLSearchParams(
+               window.location.search,
+          );
+          var fromUrl = params.get("palette");
+          if (fromUrl && PALETTES[fromUrl]) {
+               initial = fromUrl;
+          } else {
+               var saved =
+                    localStorage.getItem(PALETTE_STORAGE_KEY);
+               if (saved && PALETTES[saved]) {
+                    initial = saved;
+               }
+          }
+     } catch (e) {}
+
+     applyPaletteState(initial, false);
+
+     document.addEventListener("click", function (event) {
+          var switcher =
+               document.getElementById("palette-switcher");
+          if (
+               switcher &&
+               switcher.classList.contains("is-open") &&
+               !switcher.contains(event.target)
+          ) {
+               togglePaletteMenu(false);
+          }
+     });
+
+     document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape") {
+               togglePaletteMenu(false);
+          }
+     });
+}
+
+var VERSE_READ_DELAY_MS = 3200;
+var DETAILS_READ_DELAY_MS = 1800;
+var invitationTimer = null;
+var invitationTimerStartedAt = 0;
+var invitationRemainingMs = VERSE_READ_DELAY_MS;
+var invitationRevealed = false;
+var invitationDetailsTimer = null;
+var invitationDetailsStartedAt = 0;
+var invitationDetailsRemainingMs = DETAILS_READ_DELAY_MS;
+var invitationDetailsShown = false;
+var invitationHolding = false;
+var slideMotionBusy = false;
+
+function pauseInvitationTimer(minRemainingMs) {
+     if (invitationTimer) {
+          clearTimeout(invitationTimer);
+          invitationTimer = null;
+          var elapsed = Date.now() - invitationTimerStartedAt;
+          invitationRemainingMs = Math.max(
+               0,
+               invitationRemainingMs - elapsed,
+          );
+     }
+     if (
+          typeof minRemainingMs === "number" &&
+          !invitationRevealed
+     ) {
+          invitationRemainingMs = Math.max(
+               invitationRemainingMs,
+               minRemainingMs,
+          );
+     }
+     if (invitationDetailsTimer) {
+          clearTimeout(invitationDetailsTimer);
+          invitationDetailsTimer = null;
+          var detailsElapsed =
+               Date.now() - invitationDetailsStartedAt;
+          invitationDetailsRemainingMs = Math.max(
+               0,
+               invitationDetailsRemainingMs - detailsElapsed,
+          );
+     }
+}
+
+function showInvitationDetailsNow() {
+     var sheet = document.getElementById("invitation-sheet");
+     if (!sheet || invitationDetailsShown) return;
+     invitationDetailsShown = true;
+     if (invitationDetailsTimer) {
+          clearTimeout(invitationDetailsTimer);
+          invitationDetailsTimer = null;
+     }
+     sheet.classList.add("is-details-shown");
+     var fullEl = sheet.querySelector(".invite-names-full");
+     var shortEl = sheet.querySelector(".invite-names-short");
+     if (fullEl) fullEl.setAttribute("aria-hidden", "true");
+     if (shortEl) shortEl.setAttribute("aria-hidden", "false");
+     syncMoviePlayback();
+}
+
+function revealInvitationNow() {
+     var sheet = document.getElementById("invitation-sheet");
+     if (!sheet) return;
+     invitationRevealed = true;
+     invitationHolding = false;
+     if (invitationTimer) {
+          clearTimeout(invitationTimer);
+          invitationTimer = null;
+     }
+     sheet.classList.add("is-unblurred");
+     syncInvitationTimer();
+}
+
+function resetInvitationStage() {
+     if (invitationTimer) {
+          clearTimeout(invitationTimer);
+          invitationTimer = null;
+     }
+     if (invitationDetailsTimer) {
+          clearTimeout(invitationDetailsTimer);
+          invitationDetailsTimer = null;
+     }
+     invitationRevealed = false;
+     invitationDetailsShown = false;
+     invitationHolding = false;
+     invitationRemainingMs = VERSE_READ_DELAY_MS;
+     invitationDetailsRemainingMs = DETAILS_READ_DELAY_MS;
+
+     var sheet = document.getElementById("invitation-sheet");
+     if (sheet) {
+          sheet.classList.remove(
+               "is-unblurred",
+               "is-details-shown",
+          );
+          var fullEl = sheet.querySelector(".invite-names-full");
+          var shortEl = sheet.querySelector(
+               ".invite-names-short",
+          );
+          if (fullEl)
+               fullEl.setAttribute("aria-hidden", "false");
+          if (shortEl)
+               shortEl.setAttribute("aria-hidden", "true");
+     }
+}
+
+function syncInvitationTimer() {
+     var sheet = document.getElementById("invitation-sheet");
+     if (!sheet) return;
+
+     if (invitationRevealed && invitationDetailsShown) return;
+
+     var chapter = sheet.closest(".album-chapter");
+     var inMainView =
+          !document.hidden &&
+          chapter &&
+          chapter.classList.contains("is-active");
+
+     if (!inMainView) {
+          pauseInvitationTimer();
+          if (!invitationRevealed) {
+               invitationRemainingMs = VERSE_READ_DELAY_MS;
+          } else if (!invitationDetailsShown) {
+               invitationDetailsRemainingMs =
+                    DETAILS_READ_DELAY_MS;
+          }
+          return;
+     }
+
+     if (slideMotionBusy || invitationHolding) {
+          pauseInvitationTimer();
+          return;
+     }
+
+     if (!invitationRevealed) {
+          if (!invitationTimer) {
+               invitationTimerStartedAt = Date.now();
+               invitationTimer = setTimeout(function () {
+                    revealInvitationNow();
+               }, invitationRemainingMs);
+          }
+     } else if (!invitationDetailsShown) {
+          if (!invitationDetailsTimer) {
+               invitationDetailsStartedAt = Date.now();
+               invitationDetailsTimer = setTimeout(function () {
+                    showInvitationDetailsNow();
+               }, invitationDetailsRemainingMs);
+          }
+     }
+}
+
+function setSlideMotionBusy(busy) {
+     slideMotionBusy = !!busy;
+     syncInvitationTimer();
+}
+
+function setupInvitationTrigger() {
+     var sheet = document.getElementById("invitation-sheet");
+     if (!sheet) return;
+
+     var content = sheet.querySelector(".invitation-content");
+     if (content) {
+          content.addEventListener("click", function () {
+               if (
+                    invitationRevealed &&
+                    !invitationDetailsShown
+               ) {
+                    showInvitationDetailsNow();
+               }
+          });
+     }
+
+     var veil = sheet.querySelector(".scripture-veil");
+     if (veil) {
+          var pressStartTime = 0;
+          var pressStartX = 0;
+          var pressStartY = 0;
+          var pressMoved = false;
+          var suppressClickUntil = 0;
+
+          veil.addEventListener("pointerdown", function (event) {
+               if (invitationRevealed) return;
+               if (event.button && event.button !== 0) return;
+               invitationHolding = true;
+               pressStartTime = Date.now();
+               pressStartX = event.clientX;
+               pressStartY = event.clientY;
+               pressMoved = false;
+               pauseInvitationTimer();
+          });
+
+          veil.addEventListener("pointermove", function (event) {
+               if (!invitationHolding) return;
+               var dx = event.clientX - pressStartX;
+               var dy = event.clientY - pressStartY;
+               if (Math.hypot(dx, dy) > 12) {
+                    pressMoved = true;
+               }
+          });
+
+          function endHold(isCancelled) {
+               if (!invitationHolding) return;
+               invitationHolding = false;
+               var heldMs = Date.now() - pressStartTime;
+               if (isCancelled || pressMoved || heldMs >= 240) {
+                    suppressClickUntil = Date.now() + 500;
+                    pauseInvitationTimer(1600);
+               }
+               syncInvitationTimer();
+          }
+
+          veil.addEventListener("pointerup", function () {
+               endHold(false);
+          });
+
+          veil.addEventListener("pointercancel", function () {
+               endHold(true);
+          });
+
+          veil.addEventListener("click", function (event) {
+               if (Date.now() < suppressClickUntil) {
+                    event.preventDefault();
+                    return;
+               }
+               revealInvitationNow();
+          });
+
+          veil.addEventListener("keydown", function (event) {
+               if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    revealInvitationNow();
+               }
+          });
+     }
+
+     document.addEventListener(
+          "visibilitychange",
+          syncInvitationTimer,
+     );
+     syncInvitationTimer();
+}
+
+// 7. In-Place Card Deck Controller (No Downward Scroll) + Album Opening Sequence
+function setupDeckNavigation() {
+     var slides = Array.prototype.slice.call(
+          document.querySelectorAll(".album-chapter"),
+     );
+     if (!slides.length) return;
+
+     var coverEl = document.getElementById("cover");
+     var isTransitioning = false;
+     var isAlbumOpening = false;
+     var isAlbumOpen = false;
+     var albumOpenTimer = null;
+     var albumCloseTimer = null;
+     var settleDoneTimer = null;
+     var leaveTimers = {};
+     var wheelLockUntil = 0;
+     var internalScrollLockUntil = 0;
+     var wheelAccum = 0;
+     var wheelResetTimer = null;
+     var touchStartY = 0;
+     var touchPrevY = 0;
+     var touchStartIdx = 0;
+     var touchStartScrollTop = 0;
+     var touchStartAtTop = false;
+     var touchStartAtBottom = false;
+     var isTouching = false;
+
+     function isSlideTall(slide) {
+          return !!(
+               slide &&
+               slide.scrollHeight > slide.clientHeight + 2
+          );
+     }
+
+     function isSlideAtTop(slide, tolerancePx) {
+          var tol =
+               typeof tolerancePx === "number"
+                    ? tolerancePx
+                    : 14;
+          return !slide || slide.scrollTop <= tol;
+     }
+
+     function isSlideAtBottom(slide, tolerancePx) {
+          var tol =
+               typeof tolerancePx === "number"
+                    ? tolerancePx
+                    : 14;
+          return (
+               !slide ||
+               Math.ceil(slide.scrollTop + slide.clientHeight) >=
+                    slide.scrollHeight - tol
+          );
+     }
+
+     var MOVIE_DWELL_MS = {
+          cover: 2400,
+          invitation: 3400,
+          schedule: 4200,
+          story: 4200,
+          travel: 4500,
+          rsvp: 4000,
+     };
+     var movieUserPaused = false;
+     var movieRepeatEnabled = false;
+     var movieFormPaused = false;
+     var movieFormManualOverride = false;
+     var movieTimer = null;
+     var movieScrollTimer = null;
+     var movieAutoScrollingUntil = 0;
+
+     function prefersReducedMotion() {
+          return (
+               window.matchMedia &&
+               window.matchMedia(
+                    "(prefers-reduced-motion: reduce)",
+               ).matches
+          );
+     }
+
+     function isRsvpEditing() {
+          var slide = slides[activeSlideIndex];
+          if (!slide || slide.id !== "rsvp" || rsvpJustSubmitted)
+               return false;
+          if (movieFormManualOverride) return false;
+          if (movieFormPaused) return true;
+
+          var card = document.getElementById("rsvp-form-card");
+          if (!card || card.style.display === "none")
+               return false;
+
+          var activeEl = document.activeElement;
+          if (activeEl && card.contains(activeEl)) return true;
+
+          var nameInput = document.getElementById("rsvp-name");
+          var notesInput = document.getElementById("rsvp-notes");
+          if (
+               (nameInput && nameInput.value.trim()) ||
+               (notesInput && notesInput.value.trim())
+          ) {
+               return true;
+          }
+          return false;
+     }
+
+     function clearMovieTimers() {
+          if (movieTimer) {
+               clearTimeout(movieTimer);
+               movieTimer = null;
+          }
+          if (movieScrollTimer) {
+               clearTimeout(movieScrollTimer);
+               movieScrollTimer = null;
+          }
+     }
+
+     function updateMovieToggleUI() {
+          var btn = document.getElementById("movie-toggle-btn");
+          var icon =
+               document.getElementById("movie-toggle-icon");
+          var label =
+               document.getElementById("movie-toggle-label");
+          var isPaused = movieUserPaused || isRsvpEditing();
+          if (btn) {
+               btn.classList.toggle("is-active", !isPaused);
+               btn.setAttribute(
+                    "aria-pressed",
+                    !isPaused ? "true" : "false",
+               );
+               btn.setAttribute(
+                    "aria-label",
+                    isPaused
+                         ? "Auto advance Off — click to resume"
+                         : "Auto advance On — click to pause",
+               );
+               btn.setAttribute(
+                    "title",
+                    isPaused
+                         ? "Auto advance: Off"
+                         : "Auto advance: On",
+               );
+               if (icon)
+                    icon.textContent = isPaused ? "▶" : "❚❚";
+               if (label) label.textContent = "Auto";
+          }
+
+          var repBtn =
+               document.getElementById("repeat-toggle-btn");
+          if (repBtn) {
+               repBtn.classList.toggle(
+                    "is-active",
+                    movieRepeatEnabled,
+               );
+               repBtn.setAttribute(
+                    "aria-pressed",
+                    movieRepeatEnabled ? "true" : "false",
+               );
+               repBtn.setAttribute(
+                    "aria-label",
+                    movieRepeatEnabled
+                         ? "Repeat slideshow On — click to turn off"
+                         : "Repeat slideshow Off — click to repeat",
+               );
+               repBtn.setAttribute(
+                    "title",
+                    movieRepeatEnabled
+                         ? "Repeat slideshow: On"
+                         : "Repeat slideshow: Off",
+               );
+          }
+     }
+
+     function canAdvanceFromSlide(idx) {
+          if (idx < slides.length - 1) return true;
+          var slide = slides[idx];
+          return !!(
+               slide &&
+               slide.id === "rsvp" &&
+               !rsvpOrigamiStarted
+          );
+     }
+
+     function canStepBackFromSlide(idx) {
+          var slide = slides[idx];
+          if (slide && slide.id === "rsvp" && rsvpOrigamiStarted)
+               return true;
+          return idx > 0;
+     }
+
+     function advanceFromCurrentSlide() {
+          var slide = slides[activeSlideIndex];
+          if (slide && slide.id === "story" && stepStoryFrame(1)) {
+               wheelLockUntil = Date.now() + 620;
+               wheelAccum = 0;
+               if (slide.scrollTop > 8) {
+                    movieAutoScrollingUntil = Date.now() + 500;
+                    try {
+                         slide.scrollTo({
+                              top: 0,
+                              behavior: "smooth",
+                         });
+                    } catch (e) {
+                         slide.scrollTop = 0;
+                    }
+               }
+               setSlideMotionBusy(false);
+               scheduleMovieStep();
+               return;
+          }
+          if (activeSlideIndex < slides.length - 1) {
+               goToSlide(activeSlideIndex + 1, false);
+          } else if (
+               slide &&
+               slide.id === "rsvp" &&
+               !rsvpOrigamiStarted
+          ) {
+               wheelLockUntil = Date.now() + 700;
+               wheelAccum = 0;
+               setSlideMotionBusy(false);
+               triggerRsvpOrigami(0);
+          }
+     }
+
+     function stepBackFromCurrentSlide() {
+          var slide = slides[activeSlideIndex];
+          if (
+               slide &&
+               slide.id === "story" &&
+               stepStoryFrame(-1)
+          ) {
+               wheelLockUntil = Date.now() + 620;
+               wheelAccum = 0;
+               if (slide.scrollTop > 8) {
+                    movieAutoScrollingUntil = Date.now() + 500;
+                    try {
+                         slide.scrollTo({
+                              top: 0,
+                              behavior: "smooth",
+                         });
+                    } catch (e) {
+                         slide.scrollTop = 0;
+                    }
+               }
+               setSlideMotionBusy(false);
+               scheduleMovieStep();
+               return;
+          }
+          if (
+               slide &&
+               slide.id === "rsvp" &&
+               rsvpOrigamiStarted
+          ) {
+               wheelLockUntil = Date.now() + 520;
+               wheelAccum = 0;
+               resetFarewellStage();
+               setSlideMotionBusy(false);
+               scheduleMovieStep();
+               return;
+          }
+          if (activeSlideIndex > 0) {
+               goToSlide(activeSlideIndex - 1, true);
+          }
+     }
+
+     function scheduleMovieStep() {
+          clearMovieTimers();
+          updateMovieToggleUI();
+
+          if (
+               prefersReducedMotion() ||
+               movieUserPaused ||
+               document.hidden
+          )
+               return;
+          if (isTransitioning || isAlbumOpening || isTouching)
+               return;
+
+          var switcher =
+               document.getElementById("palette-switcher");
+          if (switcher && switcher.classList.contains("is-open"))
+               return;
+
+          var slide = slides[activeSlideIndex];
+          if (!slide) return;
+
+          if (activeSlideIndex >= slides.length - 1) {
+               if (slide.id === "rsvp" && rsvpOrigamiStarted) {
+                    if (
+                         !rsvpOrigamiCompleted ||
+                         !movieRepeatEnabled
+                    )
+                         return;
+                    movieTimer = setTimeout(function () {
+                         movieTimer = null;
+                         if (
+                              !movieUserPaused &&
+                              movieRepeatEnabled &&
+                              !isTransitioning &&
+                              !isAlbumOpening &&
+                              !isTouching
+                         ) {
+                              goToSlide(0, false);
+                         }
+                    }, 2600);
+                    return;
+               }
+               if (!(slide.id === "rsvp" && !rsvpOrigamiStarted))
+                    return;
+          }
+
+          if (
+               slide.id === "invitation" &&
+               (!invitationRevealed || !invitationDetailsShown)
+          )
+               return;
+          if (isRsvpEditing()) return;
+
+          var dwellMs =
+               slide.id === "rsvp" && rsvpJustSubmitted
+                    ? 2200
+                    : MOVIE_DWELL_MS[slide.id] || 3800;
+
+          var atBottom =
+               slide.scrollTop + slide.clientHeight >=
+               slide.scrollHeight - 4;
+          if (isSlideTall(slide) && !atBottom) {
+               var firstHalf = Math.round(dwellMs * 0.45);
+               var secondHalf = Math.max(
+                    1500,
+                    dwellMs - firstHalf,
+               );
+               movieScrollTimer = setTimeout(function () {
+                    movieScrollTimer = null;
+                    if (
+                         movieUserPaused ||
+                         isTransitioning ||
+                         isAlbumOpening ||
+                         isTouching ||
+                         isRsvpEditing()
+                    )
+                         return;
+                    movieAutoScrollingUntil = Date.now() + 900;
+                    try {
+                         slide.scrollTo({
+                              top: slide.scrollHeight,
+                              behavior: "smooth",
+                         });
+                    } catch (e) {
+                         slide.scrollTop = slide.scrollHeight;
+                    }
+                    movieTimer = setTimeout(function () {
+                         movieTimer = null;
+                         if (
+                              !movieUserPaused &&
+                              !isTransitioning &&
+                              !isAlbumOpening &&
+                              !isTouching &&
+                              !isRsvpEditing()
+                         ) {
+                              advanceFromCurrentSlide();
+                         }
+                    }, secondHalf);
+               }, firstHalf);
+          } else {
+               movieTimer = setTimeout(function () {
+                    movieTimer = null;
+                    if (
+                         !movieUserPaused &&
+                         !isTransitioning &&
+                         !isAlbumOpening &&
+                         !isTouching &&
+                         !isRsvpEditing()
+                    ) {
+                         advanceFromCurrentSlide();
+                    }
+               }, dwellMs);
+          }
+     }
+
+     syncMoviePlayback = scheduleMovieStep;
+
+     toggleMovieAutoPlay = function () {
+          if (movieUserPaused) {
+               movieUserPaused = false;
+               if (isRsvpEditing()) {
+                    movieFormPaused = false;
+                    movieFormManualOverride = true;
+               }
+               scheduleMovieStep();
+          } else if (isRsvpEditing()) {
+               movieFormPaused = false;
+               movieFormManualOverride = true;
+               scheduleMovieStep();
+          } else {
+               movieUserPaused = true;
+               clearMovieTimers();
+               updateMovieToggleUI();
+          }
+     };
+
+     toggleMovieRepeat = function () {
+          movieRepeatEnabled = !movieRepeatEnabled;
+          updateMovieToggleUI();
+          if (movieRepeatEnabled) {
+               scheduleMovieStep();
+          } else if (
+               activeSlideIndex >= slides.length - 1 &&
+               rsvpOrigamiCompleted
+          ) {
+               clearMovieTimers();
+          }
+     };
+
+     notifyMovieFormInteraction = function (paused) {
+          movieFormPaused = !!paused;
+          if (movieFormPaused) {
+               movieFormManualOverride = false;
+               movieAutoScrollingUntil = 0;
+               clearMovieTimers();
+          }
+          scheduleMovieStep();
+     };
+
+     function clearLeaveTimer(idx) {
+          if (leaveTimers[idx]) {
+               clearTimeout(leaveTimers[idx]);
+               delete leaveTimers[idx];
+          }
+     }
+
+     function activateImmediate(idx) {
+          clearMovieTimers();
+          slides.forEach(function (slide, i) {
+               clearLeaveTimer(i);
+               slide.classList.remove("is-leaving");
+               if (i === idx) {
+                    slide.classList.add("is-active", "is-shown");
+               } else {
+                    slide.classList.remove(
+                         "is-active",
+                         "is-shown",
+                    );
+               }
+          });
+          activeSlideIndex = idx;
+          updateScrollProgress(idx);
+          if (slides[idx] && slides[idx].id === "schedule") {
+               var sched =
+                    document.getElementById("schedule-sheet");
+               if (sched)
+                    sched.classList.add("is-timeline-active");
+          }
+          if (slides[idx] && slides[idx].id === "story") {
+               enterStoryChapter(false);
+          } else {
+               resetStoryChapter();
+          }
+          if (slides[idx] && slides[idx].id === "rsvp") {
+               resetFarewellStage();
+          } else {
+               clearFarewellTimers();
+          }
+          syncInvitationTimer();
+          scheduleMovieStep();
+     }
+
+     function transitionBetweenSlides(
+          fromIdx,
+          toIdx,
+          scrollToBottom,
+     ) {
+          if (fromIdx === toIdx) return;
+
+          var fromSlide = slides[fromIdx];
+          var toSlide = slides[toIdx];
+          if (!toSlide) return;
+
+          clearMovieTimers();
+
+          if (prefersReducedMotion()) {
+               activateImmediate(toIdx);
+               isTransitioning = false;
+               setSlideMotionBusy(isTouching);
+               return;
+          }
+
+          clearLeaveTimer(fromIdx);
+          clearLeaveTimer(toIdx);
+          if (settleDoneTimer) {
+               clearTimeout(settleDoneTimer);
+               settleDoneTimer = null;
+          }
+
+          isTransitioning = true;
+          setSlideMotionBusy(true);
+
+          if (fromSlide) {
+               fromSlide.classList.remove(
+                    "is-active",
+                    "is-shown",
+               );
+               fromSlide.classList.add("is-leaving");
+               if (fromSlide.id === "story") {
+                    resetStoryChapter();
+               }
+               if (fromSlide.id === "rsvp") {
+                    rsvpJustSubmitted = false;
+                    movieFormPaused = false;
+                    movieFormManualOverride = false;
+                    clearFarewellTimers();
+                    var fl = document.getElementById(
+                         "origami-flight-layer",
+                    );
+                    if (fl)
+                         fl.classList.remove(
+                              "is-active",
+                              "is-folding",
+                              "is-flying",
+                         );
+               }
+               leaveTimers[fromIdx] = setTimeout(
+                    function () {
+                         delete leaveTimers[fromIdx];
+                         fromSlide.classList.remove(
+                              "is-leaving",
+                         );
+                         if (fromSlide.id === "schedule") {
+                              var schedOut =
+                                   document.getElementById(
+                                        "schedule-sheet",
+                                   );
+                              if (schedOut)
+                                   schedOut.classList.remove(
+                                        "is-timeline-active",
+                                   );
+                         }
+                         if (fromSlide.id === "rsvp") {
+                              resetFarewellStage();
+                         }
+                    },
+                    fromSlide.id === "cover" ? 340 : 280,
+               );
+          }
+
+          if (toSlide.id === "schedule") {
+               var schedReset =
+                    document.getElementById("schedule-sheet");
+               if (schedReset)
+                    schedReset.classList.remove(
+                         "is-timeline-active",
+                    );
+          }
+          if (toSlide.id === "story") {
+               enterStoryChapter(!!scrollToBottom);
+          }
+          if (toSlide.id === "rsvp") {
+               resetFarewellStage();
+          }
+          if (toSlide.id === "cover") {
+               closeAlbumCover(0);
+          }
+
+          toSlide.classList.remove("is-leaving", "is-shown");
+          toSlide.classList.add("is-active");
+          movieAutoScrollingUntil = Date.now() + 120;
+          toSlide.scrollTop = scrollToBottom
+               ? toSlide.scrollHeight
+               : 0;
+
+          activeSlideIndex = toIdx;
+          updateScrollProgress(toIdx);
+          updateMovieToggleUI();
+          syncInvitationTimer();
+
+          requestAnimationFrame(function () {
+               requestAnimationFrame(function () {
+                    if (activeSlideIndex !== toIdx) return;
+                    toSlide.classList.add("is-shown");
+                    if (toSlide.id === "schedule") {
+                         var schedIn =
+                              document.getElementById(
+                                   "schedule-sheet",
+                              );
+                         if (schedIn)
+                              schedIn.classList.add(
+                                   "is-timeline-active",
+                              );
+                    }
+               });
+          });
+
+          settleDoneTimer = setTimeout(function () {
+               settleDoneTimer = null;
+               isTransitioning = false;
+               setSlideMotionBusy(isTouching);
+               scheduleMovieStep();
+          }, 600);
+     }
+
+     function closeAlbumCover(delayMs) {
+          if (albumOpenTimer) {
+               clearTimeout(albumOpenTimer);
+               albumOpenTimer = null;
+          }
+          if (albumCloseTimer) {
+               clearTimeout(albumCloseTimer);
+               albumCloseTimer = null;
+          }
+          isAlbumOpening = false;
+          isAlbumOpen = false;
+          if (!coverEl) return;
+
+          if (!delayMs || prefersReducedMotion()) {
+               coverEl.classList.remove(
+                    "is-album-opening",
+                    "is-album-open",
+               );
+          } else {
+               albumCloseTimer = setTimeout(function () {
+                    albumCloseTimer = null;
+                    if (coverEl) {
+                         coverEl.classList.remove(
+                              "is-album-opening",
+                              "is-album-open",
+                         );
+                    }
+               }, delayMs);
+          }
+     }
+
+     function openAlbumToSlide(targetIdx) {
+          clearMovieTimers();
+          if (!coverEl || prefersReducedMotion()) {
+               isAlbumOpen = true;
+               wheelLockUntil = Date.now() + 650;
+               wheelAccum = 0;
+               transitionBetweenSlides(
+                    activeSlideIndex,
+                    targetIdx,
+                    false,
+               );
+               return;
+          }
+
+          if (albumCloseTimer) {
+               clearTimeout(albumCloseTimer);
+               albumCloseTimer = null;
+          }
+          if (albumOpenTimer) {
+               clearTimeout(albumOpenTimer);
+               albumOpenTimer = null;
+          }
+
+          isAlbumOpening = true;
+          isTransitioning = true;
+          setSlideMotionBusy(true);
+          wheelLockUntil = Date.now() + 920;
+          wheelAccum = 0;
+
+          coverEl.classList.add("is-album-opening");
+
+          albumOpenTimer = setTimeout(function () {
+               albumOpenTimer = null;
+               if (coverEl)
+                    coverEl.classList.add("is-album-open");
+               isAlbumOpening = false;
+               isAlbumOpen = true;
+               transitionBetweenSlides(0, targetIdx, false);
+          }, 260);
+     }
+
+     function goToSlide(idx, scrollToBottom) {
+          idx = Math.max(0, Math.min(slides.length - 1, idx));
+          if (
+               idx === activeSlideIndex ||
+               isTransitioning ||
+               isAlbumOpening
+          )
+               return;
+
+          var currentSlide = slides[activeSlideIndex];
+          if (
+               currentSlide &&
+               currentSlide.id === "invitation" &&
+               idx > activeSlideIndex
+          ) {
+               if (!invitationRevealed) {
+                    wheelLockUntil = Date.now() + 900;
+                    wheelAccum = 0;
+                    clearMovieTimers();
+                    setSlideMotionBusy(false);
+                    revealInvitationNow();
+                    scheduleMovieStep();
+                    return;
+               }
+               if (!invitationDetailsShown) {
+                    wheelLockUntil = Date.now() + 950;
+                    wheelAccum = 0;
+                    clearMovieTimers();
+                    setSlideMotionBusy(false);
+                    showInvitationDetailsNow();
+                    scheduleMovieStep();
+                    return;
+               }
+          }
+
+          if (
+               activeSlideIndex === 0 &&
+               idx > 0 &&
+               !isAlbumOpen
+          ) {
+               openAlbumToSlide(idx);
+               return;
+          }
+
+          wheelLockUntil = Date.now() + 640;
+          wheelAccum = 0;
+
+          if (idx === 0) {
+               rsvpJustSubmitted = false;
+               movieFormPaused = false;
+               movieFormManualOverride = false;
+               resetInvitationStage();
+               closeAlbumCover(0);
+               transitionBetweenSlides(
+                    activeSlideIndex,
+                    0,
+                    false,
+               );
+               return;
+          }
+
+          transitionBetweenSlides(
+               activeSlideIndex,
+               idx,
+               scrollToBottom,
+          );
+     }
+
+     window.addEventListener(
+          "wheel",
+          function (event) {
+               if (event.ctrlKey || event.metaKey) return;
+
+               var switcher =
+                    document.getElementById("palette-switcher");
+               if (
+                    switcher &&
+                    switcher.classList.contains("is-open") &&
+                    switcher.contains(event.target)
+               ) {
+                    return;
+               }
+
+               applyPetalScrollImpulse(event.deltaY);
+
+               if (
+                    isTransitioning ||
+                    isAlbumOpening ||
+                    Date.now() < wheelLockUntil
+               ) {
+                    event.preventDefault();
+                    return;
+               }
+
+               movieAutoScrollingUntil = 0;
+
+               var slide = slides[activeSlideIndex];
+               var isTall = isSlideTall(slide);
+
+               if (isTall) {
+                    var atBottom = isSlideAtBottom(slide, 4);
+                    var atTop = isSlideAtTop(slide, 4);
+                    if (
+                         (event.deltaY > 0 && !atBottom) ||
+                         (event.deltaY < 0 && !atTop)
+                    ) {
+                         internalScrollLockUntil =
+                              Date.now() + 420;
+                         wheelAccum = 0;
+                         scheduleMovieStep();
+                         return;
+                    }
+                    if (Date.now() < internalScrollLockUntil) {
+                         event.preventDefault();
+                         wheelAccum = 0;
+                         scheduleMovieStep();
+                         return;
+                    }
+               }
+
+               event.preventDefault();
+
+               wheelAccum += event.deltaY;
+               if (wheelResetTimer)
+                    clearTimeout(wheelResetTimer);
+               wheelResetTimer = setTimeout(function () {
+                    wheelAccum = 0;
+               }, 150);
+
+               if (
+                    wheelAccum >= 48 &&
+                    canAdvanceFromSlide(activeSlideIndex)
+               ) {
+                    advanceFromCurrentSlide();
+               } else if (
+                    wheelAccum <= -48 &&
+                    canStepBackFromSlide(activeSlideIndex)
+               ) {
+                    stepBackFromCurrentSlide();
+               } else {
+                    scheduleMovieStep();
+               }
+          },
+          { passive: false },
+     );
+
+     window.addEventListener(
+          "touchstart",
+          function (event) {
+               if (
+                    event.touches.length !== 1 ||
+                    isAlbumOpening ||
+                    isTransitioning
+               )
+                    return;
+               isTouching = true;
+               movieAutoScrollingUntil = 0;
+               clearMovieTimers();
+               setSlideMotionBusy(true);
+               touchStartY = event.touches[0].clientY;
+               touchPrevY = touchStartY;
+               touchStartIdx = activeSlideIndex;
+               var startSlide = slides[touchStartIdx];
+               touchStartScrollTop = startSlide
+                    ? startSlide.scrollTop
+                    : 0;
+               touchStartAtTop = isSlideAtTop(startSlide, 14);
+               touchStartAtBottom = isSlideAtBottom(
+                    startSlide,
+                    14,
+               );
+          },
+          { passive: true },
+     );
+
+     window.addEventListener(
+          "touchmove",
+          function (event) {
+               if (!isTouching || event.touches.length !== 1)
+                    return;
+               var switcher =
+                    document.getElementById("palette-switcher");
+               if (
+                    switcher &&
+                    switcher.classList.contains("is-open") &&
+                    switcher.contains(event.target)
+               ) {
+                    return;
+               }
+               var currentY = event.touches[0].clientY;
+               var touchStepDelta = touchPrevY - currentY;
+               touchPrevY = currentY;
+               applyPetalScrollImpulse(touchStepDelta);
+
+               var slide = slides[touchStartIdx];
+               if (!isSlideTall(slide)) {
+                    event.preventDefault();
+                    return;
+               }
+               var moveDelta = touchStartY - currentY;
+               if (
+                    (touchStartAtBottom &&
+                         moveDelta > 1 &&
+                         canAdvanceFromSlide(touchStartIdx)) ||
+                    (touchStartAtTop &&
+                         moveDelta < -1 &&
+                         canStepBackFromSlide(touchStartIdx))
+               ) {
+                    if (event.cancelable) {
+                         event.preventDefault();
+                    }
+               }
+          },
+          { passive: false },
+     );
+
+     window.addEventListener(
+          "touchend",
+          function (event) {
+               isTouching = false;
+               if (isAlbumOpening || isTransitioning) return;
+               if (!event.changedTouches.length) {
+                    setSlideMotionBusy(false);
+                    return;
+               }
+
+               var switcher =
+                    document.getElementById("palette-switcher");
+               if (
+                    switcher &&
+                    switcher.classList.contains("is-open") &&
+                    switcher.contains(event.target)
+               ) {
+                    setSlideMotionBusy(false);
+                    return;
+               }
+
+               if (storySwipeConsumed) {
+                    storySwipeConsumed = false;
+                    setSlideMotionBusy(false);
+                    scheduleMovieStep();
+                    return;
+               }
+
+               var slide = slides[touchStartIdx];
+               var delta =
+                    touchStartY -
+                    event.changedTouches[0].clientY;
+               var isTall = isSlideTall(slide);
+
+               if (!isTall) {
+                    if (
+                         delta > 36 &&
+                         canAdvanceFromSlide(touchStartIdx)
+                    ) {
+                         advanceFromCurrentSlide();
+                         return;
+                    } else if (
+                         delta < -36 &&
+                         canStepBackFromSlide(touchStartIdx)
+                    ) {
+                         stepBackFromCurrentSlide();
+                         return;
+                    }
+               } else {
+                    var scrollMoved = Math.abs(
+                         slide.scrollTop - touchStartScrollTop,
+                    );
+                    var endAtBottom = isSlideAtBottom(slide, 14);
+                    var endAtTop = isSlideAtTop(slide, 14);
+                    if (
+                         (touchStartAtBottom || endAtBottom) &&
+                         scrollMoved < 20 &&
+                         delta > 36 &&
+                         canAdvanceFromSlide(touchStartIdx)
+                    ) {
+                         advanceFromCurrentSlide();
+                         return;
+                    } else if (
+                         (touchStartAtTop || endAtTop) &&
+                         scrollMoved < 20 &&
+                         delta < -36 &&
+                         canStepBackFromSlide(touchStartIdx)
+                    ) {
+                         stepBackFromCurrentSlide();
+                         return;
+                    }
+               }
+
+               setSlideMotionBusy(false);
+               scheduleMovieStep();
+          },
+          { passive: true },
+     );
+
+     window.addEventListener(
+          "touchcancel",
+          function () {
+               isTouching = false;
+               storySwipeConsumed = false;
+               setSlideMotionBusy(
+                    isTransitioning || isAlbumOpening,
+               );
+               scheduleMovieStep();
+          },
+          { passive: true },
+     );
+
+     window.addEventListener("keydown", function (event) {
+          var tag = event.target && event.target.tagName;
+          if (
+               tag === "INPUT" ||
+               tag === "SELECT" ||
+               tag === "TEXTAREA" ||
+               tag === "BUTTON" ||
+               tag === "A"
+          )
+               return;
+          if (isAlbumOpening || isTransitioning) {
+               event.preventDefault();
+               return;
+          }
+
+          var slide = slides[activeSlideIndex];
+          var isTall = isSlideTall(slide);
+
+          if (
+               event.key === "ArrowDown" ||
+               event.key === "PageDown" ||
+               (event.key === " " && !event.shiftKey)
+          ) {
+               applyPetalScrollImpulse(55);
+               if (
+                    isTall &&
+                    slide.scrollTop + slide.clientHeight <
+                         slide.scrollHeight - 4
+               ) {
+                    movieAutoScrollingUntil = 0;
+                    scheduleMovieStep();
+                    return;
+               }
+               if (canAdvanceFromSlide(activeSlideIndex)) {
+                    event.preventDefault();
+                    advanceFromCurrentSlide();
+               }
+          } else if (
+               event.key === "ArrowUp" ||
+               event.key === "PageUp" ||
+               (event.key === " " && event.shiftKey)
+          ) {
+               applyPetalScrollImpulse(-55);
+               if (isTall && slide.scrollTop > 4) {
+                    movieAutoScrollingUntil = 0;
+                    scheduleMovieStep();
+                    return;
+               }
+               if (canStepBackFromSlide(activeSlideIndex)) {
+                    event.preventDefault();
+                    stepBackFromCurrentSlide();
+               }
+          } else if (
+               slide &&
+               slide.id === "story" &&
+               event.key === "ArrowRight"
+          ) {
+               event.preventDefault();
+               storyFrameIndex = (storyFrameIndex + 1) % STORY_FRAMES.length;
+               storyFrameFlipped = false;
+               renderStoryPhotobook(true);
+               scheduleMovieStep();
+          } else if (
+               slide &&
+               slide.id === "story" &&
+               event.key === "ArrowLeft"
+          ) {
+               event.preventDefault();
+               storyFrameIndex =
+                    (storyFrameIndex - 1 + STORY_FRAMES.length) %
+                    STORY_FRAMES.length;
+               storyFrameFlipped = false;
+               renderStoryPhotobook(true);
+               scheduleMovieStep();
+          } else if (event.key === "Home") {
+               event.preventDefault();
+               goToSlide(0, false);
+          } else if (event.key === "End") {
+               event.preventDefault();
+               if (activeSlideIndex < slides.length - 1) {
+                    goToSlide(slides.length - 1, false);
+               } else {
+                    advanceFromCurrentSlide();
+               }
+          }
+     });
+
+     slides.forEach(function (slide) {
+          slide.addEventListener(
+               "scroll",
+               function () {
+                    if (slide !== slides[activeSlideIndex])
+                         return;
+                    if (
+                         isTransitioning ||
+                         isAlbumOpening ||
+                         isTouching
+                    )
+                         return;
+                    if (Date.now() < movieAutoScrollingUntil)
+                         return;
+                    scheduleMovieStep();
+               },
+               { passive: true },
+          );
+     });
+
+     document
+          .querySelectorAll('a[href^="#"]')
+          .forEach(function (link) {
+               link.addEventListener("click", function (event) {
+                    var id = link.getAttribute("href").slice(1);
+                    var targetIdx = slides.findIndex(
+                         function (s) {
+                              return s.id === id;
+                         },
+                    );
+                    if (targetIdx !== -1) {
+                         event.preventDefault();
+                         goToSlide(targetIdx, false);
+                    }
+               });
+          });
+
+     var rsvpFormCard =
+          document.getElementById("rsvp-form-card");
+     if (rsvpFormCard) {
+          [
+               "focusin",
+               "input",
+               "change",
+               "keydown",
+               "compositionstart",
+               "mousedown",
+               "touchstart",
+               "pointerdown",
+          ].forEach(function (evtName) {
+               rsvpFormCard.addEventListener(
+                    evtName,
+                    function () {
+                         notifyMovieFormInteraction(true);
+                    },
+                    evtName === "touchstart"
+                         ? { passive: true }
+                         : false,
+               );
+          });
+     }
+
+     document.addEventListener(
+          "visibilitychange",
+          scheduleMovieStep,
+     );
+
+     activateImmediate(0);
+}
+
+// 8. Background Wedding Music (Can't help falling in love - David Bay)
+var musicEnabled = true;
+var musicActuallyPlaying = false;
+var musicAwaitingGesture = false;
+var musicUnavailable = false;
+
+function getBgMusicEl() {
+     return document.getElementById("bg-music");
+}
+
+function updateMusicToggleUI() {
+     var btn = document.getElementById("music-toggle-btn");
+     var svgOn = document.getElementById("music-toggle-svg-on");
+     var svgOff = document.getElementById(
+          "music-toggle-svg-off",
+     );
+     if (!btn) return;
+
+     btn.classList.toggle(
+          "is-active",
+          musicEnabled && !musicUnavailable,
+     );
+     btn.classList.toggle(
+          "is-playing",
+          musicEnabled &&
+               musicActuallyPlaying &&
+               !musicUnavailable,
+     );
+     btn.setAttribute(
+          "aria-pressed",
+          musicEnabled ? "true" : "false",
+     );
+
+     if (svgOn)
+          svgOn.style.display = musicEnabled ? "block" : "none";
+     if (svgOff)
+          svgOff.style.display = musicEnabled ? "none" : "block";
+
+     if (musicUnavailable) {
+          btn.setAttribute("aria-label", "Music file not found");
+          btn.setAttribute(
+               "title",
+               "Add music.mp3 (or music.m4a) to enable background music",
+          );
+     } else if (
+          musicEnabled &&
+          musicAwaitingGesture &&
+          !musicActuallyPlaying
+     ) {
+          btn.setAttribute(
+               "aria-label",
+               "Music On — tap to play",
+          );
+          btn.setAttribute(
+               "title",
+               "Music: On (tap anywhere to start audio) — Can't Help Falling in Love",
+          );
+     } else if (musicEnabled) {
+          btn.setAttribute(
+               "aria-label",
+               "Music On — click to pause",
+          );
+          btn.setAttribute(
+               "title",
+               "Music: On — Can't Help Falling in Love (David Bay)",
+          );
+     } else {
+          btn.setAttribute(
+               "aria-label",
+               "Music Off — click to play",
+          );
+          btn.setAttribute("title", "Music: Off");
+     }
+}
+
+function startMusicPlayer() {
+     var audio = getBgMusicEl();
+     if (
+          !audio ||
+          musicUnavailable ||
+          !musicEnabled ||
+          document.hidden
+     )
+          return;
+     try {
+          audio.volume = 0.72;
+          var playPromise = audio.play();
+          if (
+               playPromise &&
+               typeof playPromise.then === "function"
+          ) {
+               playPromise
+                    .then(function () {
+                         musicActuallyPlaying = true;
+                         musicAwaitingGesture = false;
+                         updateMusicToggleUI();
+                    })
+                    .catch(function (err) {
+                         if (
+                              err &&
+                              (err.name ===
+                                   "NotSupportedError" ||
+                                   err.name === "AbortError") &&
+                              audio.error
+                         ) {
+                              musicUnavailable = true;
+                         } else {
+                              musicAwaitingGesture = true;
+                         }
+                         musicActuallyPlaying = false;
+                         updateMusicToggleUI();
+                    });
+          }
+     } catch (e) {
+          musicAwaitingGesture = true;
+          updateMusicToggleUI();
+     }
+}
+
+function pauseMusicPlayer() {
+     var audio = getBgMusicEl();
+     if (!audio) return;
+     try {
+          audio.pause();
+     } catch (e) {}
+     musicActuallyPlaying = false;
+}
+
+function toggleMusicPlayback() {
+     if (
+          musicEnabled &&
+          musicAwaitingGesture &&
+          !musicActuallyPlaying
+     ) {
+          musicAwaitingGesture = false;
+          startMusicPlayer();
+          updateMusicToggleUI();
+          return;
+     }
+
+     musicEnabled = !musicEnabled;
+     musicAwaitingGesture = false;
+
+     if (musicEnabled) {
+          if (musicUnavailable) {
+               var audio = getBgMusicEl();
+               if (audio) {
+                    musicUnavailable = false;
+                    audio.load();
+               }
+          }
+          startMusicPlayer();
+     } else {
+          pauseMusicPlayer();
+     }
+     updateMusicToggleUI();
+}
+
+function initBackgroundMusic() {
+     var audio = getBgMusicEl();
+     updateMusicToggleUI();
+     if (!audio) return;
+
+     audio.addEventListener("playing", function () {
+          if (!musicEnabled || document.hidden) {
+               pauseMusicPlayer();
+               return;
+          }
+          musicUnavailable = false;
+          musicActuallyPlaying = true;
+          musicAwaitingGesture = false;
+          updateMusicToggleUI();
+     });
+
+     audio.addEventListener("pause", function () {
+          musicActuallyPlaying = false;
+          updateMusicToggleUI();
+     });
+
+     audio.addEventListener("canplay", function () {
+          musicUnavailable = false;
+          updateMusicToggleUI();
+     });
+
+     audio.addEventListener("error", function () {
+          musicUnavailable = true;
+          musicActuallyPlaying = false;
+          updateMusicToggleUI();
+     });
+
+     var lastSource = audio.querySelector("source:last-of-type");
+     if (lastSource) {
+          lastSource.addEventListener("error", function () {
+               musicUnavailable = true;
+               musicActuallyPlaying = false;
+               updateMusicToggleUI();
+          });
+     }
+
+     if (musicEnabled && !document.hidden) {
+          startMusicPlayer();
+     }
+
+     var lastWheelUnlockAt = 0;
+     function unlockMusicOnGesture(event) {
+          if (
+               !musicEnabled ||
+               musicActuallyPlaying ||
+               musicUnavailable ||
+               document.hidden
+          )
+               return;
+          if (
+               event.target &&
+               event.target.closest &&
+               event.target.closest("#music-toggle-btn")
+          )
+               return;
+          if (event.type === "wheel") {
+               var now = Date.now();
+               if (now - lastWheelUnlockAt < 500) return;
+               lastWheelUnlockAt = now;
+          }
+          musicAwaitingGesture = false;
+          startMusicPlayer();
+     }
+
+     window.addEventListener(
+          "pointerdown",
+          unlockMusicOnGesture,
+          { passive: true },
+     );
+     window.addEventListener("touchend", unlockMusicOnGesture, {
+          passive: true,
+     });
+     window.addEventListener("click", unlockMusicOnGesture, {
+          passive: true,
+     });
+     window.addEventListener("keydown", unlockMusicOnGesture, {
+          passive: true,
+     });
+     window.addEventListener("wheel", unlockMusicOnGesture, {
+          passive: true,
+     });
+
+     document.addEventListener("visibilitychange", function () {
+          if (document.hidden) {
+               pauseMusicPlayer();
+               updateMusicToggleUI();
+          } else if (musicEnabled) {
+               startMusicPlayer();
+          }
+     });
+}
+
+function syncInvitationCenterOffset() {
+     var details = document.querySelector(
+          "#invitation-sheet .invitation-details-reveal",
+     );
+     var header = document.querySelector(
+          "#invitation-sheet .invitation-header-block",
+     );
+     if (details && header) {
+          header.style.setProperty(
+               "--invite-center-y",
+               Math.round(details.offsetHeight * 0.5) + "px",
+          );
+     }
+}
+
+function setupGlassGlint() {
+     if (
+          window.matchMedia &&
+          window.matchMedia("(prefers-reduced-motion: reduce)")
+               .matches
+     )
+          return;
+     var root = document.documentElement;
+     var rafPending = false;
+     var nextX = 18;
+     var nextY = 8;
+
+     window.addEventListener(
+          "pointermove",
+          function (event) {
+               if (
+                    event.pointerType &&
+                    event.pointerType !== "mouse"
+               )
+                    return;
+               nextX = Math.max(
+                    0,
+                    Math.min(
+                         100,
+                         (event.clientX /
+                              (window.innerWidth || 1)) *
+                              100,
+                    ),
+               );
+               nextY = Math.max(
+                    0,
+                    Math.min(
+                         100,
+                         (event.clientY /
+                              (window.innerHeight || 1)) *
+                              100,
+                    ),
+               );
+               if (!rafPending) {
+                    rafPending = true;
+                    requestAnimationFrame(function () {
+                         rafPending = false;
+                         root.style.setProperty(
+                              "--glint-x",
+                              nextX.toFixed(1) + "%",
+                         );
+                         root.style.setProperty(
+                              "--glint-y",
+                              nextY.toFixed(1) + "%",
+                         );
+                    });
+               }
+          },
+          { passive: true },
+     );
+}
+
+window.addEventListener("DOMContentLoaded", function () {
+     var lastStoryMobile = window.innerWidth < 720;
+     initPaletteSwitcher();
+     createPetals();
+     setupGlassGlint();
+     setupInvitationTrigger();
+     initStoryPhotobook();
+     setupDeckNavigation();
+     initBackgroundMusic();
+     syncInvitationCenterOffset();
+     if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(syncInvitationCenterOffset);
+     }
+     window.addEventListener(
+          "resize",
+          function () {
+               syncInvitationCenterOffset();
+               var nowMobile = window.innerWidth < 720;
+               if (nowMobile !== lastStoryMobile) {
+                    lastStoryMobile = nowMobile;
+                    renderStoryPhotobook(false);
+               }
+          },
+          { passive: true },
+     );
+     updateScrollProgress(0);
+     updateCountdown();
+     setInterval(updateCountdown, 1000);
+});
