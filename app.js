@@ -9,31 +9,149 @@ var petalBurstCooldownUntil = 0;
 var petalBreezeRaf = null;
 var petalHoldUntil = 0;
 
-function createSinglePetalElement(isBurst) {
-     var petal = document.createElement("div");
-     petal.className = isBurst
-          ? "jasmine-petal is-burst"
-          : "jasmine-petal";
-     petal.style.left = Math.random() * 96 + "vw";
-     if (isBurst) {
-          petal.style.animationDuration =
-               6.8 + Math.random() * 2.4 + "s";
-          petal.style.animationDelay = "0s";
-     } else {
-          petal.style.animationDuration =
-               14 + Math.random() * 10 + "s";
-          petal.style.animationDelay =
-               -(Math.random() * 16) + "s";
+function buildBotanicalSprigSvg(width, height, mirrored) {
+     if (mirrored) {
+          return (
+               '<svg width="' +
+               width +
+               '" height="' +
+               height +
+               '" viewBox="0 0 48 112" fill="none">' +
+               '<path d="M40 104 C28 76, 18 46, 12 14" stroke="var(--ink-primary)" stroke-opacity="0.82" stroke-width="1.5" stroke-linecap="round"/>' +
+               '<path d="M27 76 C18 71, 12 72, 8 76 C15 79, 22 79, 27 76 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-opacity="0.82" stroke-width="1.2"/>' +
+               '<path d="M21 54 C12 48, 7 50, 4 54 C11 57, 16 57, 21 54 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-opacity="0.82" stroke-width="1.2"/>' +
+               '<path d="M16 33 C9 28, 5 30, 3 34 C9 36, 13 36, 16 33 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-opacity="0.82" stroke-width="1.2"/>' +
+               '<circle cx="32" cy="64" r="3.2" fill="var(--ink-primary)" stroke="var(--kasavu-gold)" stroke-width="1.3"/>' +
+               '<circle cx="25" cy="42" r="3" fill="var(--ink-primary)" stroke="var(--kasavu-gold)" stroke-width="1.3"/>' +
+               '<circle cx="12" cy="12" r="3.5" fill="var(--kasavu-gold)"/>' +
+               "</svg>"
+          );
      }
-     var size = 12 + Math.round(Math.random() * 6);
-     petal.innerHTML =
+     return (
+          '<svg width="' +
+          width +
+          '" height="' +
+          height +
+          '" viewBox="0 0 48 112" fill="none">' +
+          '<path d="M8 104 C20 76, 30 46, 36 14" stroke="var(--ink-primary)" stroke-opacity="0.82" stroke-width="1.5" stroke-linecap="round"/>' +
+          '<path d="M21 76 C30 71, 36 72, 40 76 C33 79, 26 79, 21 76 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-opacity="0.82" stroke-width="1.2"/>' +
+          '<path d="M27 54 C36 48, 41 50, 44 54 C37 57, 32 57, 27 54 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-opacity="0.82" stroke-width="1.2"/>' +
+          '<path d="M32 33 C39 28, 43 30, 45 34 C39 36, 35 36, 32 33 Z" fill="var(--kasavu-gold-tint)" stroke="var(--ink-primary)" stroke-opacity="0.82" stroke-width="1.2"/>' +
+          '<circle cx="16" cy="64" r="3.2" fill="var(--ink-primary)" stroke="var(--kasavu-gold)" stroke-width="1.3"/>' +
+          '<circle cx="23" cy="42" r="3" fill="var(--ink-primary)" stroke="var(--kasavu-gold)" stroke-width="1.3"/>' +
+          '<circle cx="36" cy="12" r="3.5" fill="var(--kasavu-gold)"/>' +
+          "</svg>"
+     );
+}
+
+function buildRoseSvg(size) {
+     return (
           '<svg width="' +
           size +
           '" height="' +
           size +
-          '" viewBox="0 0 24 24" fill="none">' +
-          '<path d="M12 3C7 8 7 16 12 21C17 16 17 8 12 3Z" fill="var(--petal-fill)" fill-opacity="0.92" stroke="var(--petal-stroke)" stroke-width="1"/>' +
-          "</svg>";
+          '" viewBox="0 0 32 32" fill="none">' +
+          '<path d="M16 24 C11 23, 8 19, 9 14 C10 10, 14 8, 16 8 C18 8, 22 10, 23 14 C24 19, 21 23, 16 24 Z" fill="var(--heart-soft)" stroke="var(--heart-red)" stroke-opacity="0.82" stroke-width="1.15"/>' +
+          '<path d="M11 14 C11 10.8, 14 9, 16.5 9.5 C19.5 10.2, 21 13.5, 19.5 16.8 C18.2 19.4, 14.2 19.8, 12.2 17.6" fill="var(--heart-soft)" stroke="var(--heart-red)" stroke-opacity="0.9" stroke-width="1.1" stroke-linecap="round"/>' +
+          '<path d="M14.2 14.5 C14.2 12.6, 16.2 11.8, 17.5 12.8 C18.6 13.7, 18.2 15.6, 16.6 16.1 C15.2 16.5, 14.3 15.6, 14.2 14.5 Z" fill="var(--kasavu-gold-tint)" stroke="var(--kasavu-gold)" stroke-width="1"/>' +
+          '<path d="M12.5 23 C9.5 24, 7.5 26, 6.5 28 C9 27.5, 11.2 26, 12.5 23 Z" fill="var(--kasavu-gold-tint)" stroke="var(--kasavu-gold)" stroke-opacity="0.85" stroke-width="1"/>' +
+          '<path d="M19.5 23 C22.5 24, 24.5 26, 25.5 28 C23 27.5, 20.8 26, 19.5 23 Z" fill="var(--kasavu-gold-tint)" stroke="var(--kasavu-gold)" stroke-opacity="0.85" stroke-width="1"/>' +
+          "</svg>"
+     );
+}
+
+function buildLotusSvg(size) {
+     return (
+          '<svg width="' +
+          size +
+          '" height="' +
+          Math.round(size * 0.72) +
+          '" viewBox="0 0 36 26" fill="none">' +
+          '<path d="M18 3 C14 9, 14 16, 18 21 C22 16, 22 9, 18 3 Z" fill="var(--petal-fill)" fill-opacity="0.72" stroke="var(--kasavu-gold)" stroke-width="1"/>' +
+          '<path d="M13 8 C8 11, 7 17, 12 20 C15 18, 15 12, 13 8 Z" fill="var(--kasavu-gold-tint)" stroke="var(--kasavu-gold)" stroke-opacity="0.85" stroke-width="0.95"/>' +
+          '<path d="M23 8 C28 11, 29 17, 24 20 C21 18, 21 12, 23 8 Z" fill="var(--kasavu-gold-tint)" stroke="var(--kasavu-gold)" stroke-opacity="0.85" stroke-width="0.95"/>' +
+          '<circle cx="18" cy="22" r="1.4" fill="var(--kasavu-gold)"/>' +
+          "</svg>"
+     );
+}
+
+function buildStarBlossomSvg(size) {
+     return (
+          '<svg width="' +
+          size +
+          '" height="' +
+          size +
+          '" viewBox="0 0 28 28" fill="none">' +
+          '<path d="M14 3 C12 8, 12 11, 14 14 C16 11, 16 8, 14 3 Z" fill="var(--petal-fill)" fill-opacity="0.82" stroke="var(--petal-stroke)" stroke-width="0.9"/>' +
+          '<path d="M14 25 C12 20, 12 17, 14 14 C16 17, 16 20, 14 25 Z" fill="var(--petal-fill)" fill-opacity="0.82" stroke="var(--petal-stroke)" stroke-width="0.9"/>' +
+          '<path d="M3 14 C8 12, 11 12, 14 14 C11 16, 8 16, 3 14 Z" fill="var(--petal-fill)" fill-opacity="0.82" stroke="var(--petal-stroke)" stroke-width="0.9"/>' +
+          '<path d="M25 14 C20 12, 17 12, 14 14 C17 16, 20 16, 25 14 Z" fill="var(--petal-fill)" fill-opacity="0.82" stroke="var(--petal-stroke)" stroke-width="0.9"/>' +
+          '<circle cx="14" cy="14" r="2" fill="var(--kasavu-gold)"/>' +
+          "</svg>"
+     );
+}
+
+function createSinglePetalElement(isBurst, forceKind) {
+     var kind = forceKind;
+     if (!kind) {
+          var r = Math.random();
+          kind =
+               r < 0.18
+                    ? "sprig"
+                    : r < 0.38
+                      ? "rose"
+                      : r < 0.56
+                        ? "lotus"
+                        : r < 0.72
+                          ? "blossom"
+                          : "petal";
+     }
+     var isSprig = kind === "sprig";
+     var isFlower = kind === "rose" || kind === "lotus" || kind === "blossom";
+     var petal = document.createElement("div");
+     petal.className = isBurst
+          ? "jasmine-petal is-burst"
+          : "jasmine-petal";
+     petal.style.left = Math.random() * 94 + "vw";
+     if (isBurst) {
+          petal.style.animationDuration =
+               (isSprig || isFlower ? 7.8 : 6.8) + Math.random() * 2.4 + "s";
+          petal.style.animationDelay = "0s";
+     } else {
+          petal.style.animationDuration =
+               (isSprig || isFlower ? 17 : 14) + Math.random() * 10 + "s";
+          petal.style.animationDelay =
+               -(Math.random() * 16) + "s";
+     }
+
+     if (isSprig) {
+          var sprigW = 12 + Math.round(Math.random() * 4);
+          var sprigH = Math.round(sprigW * (112 / 48));
+          petal.innerHTML = buildBotanicalSprigSvg(
+               sprigW,
+               sprigH,
+               Math.random() < 0.5,
+          );
+     } else if (kind === "rose") {
+          var roseSize = 17 + Math.round(Math.random() * 5);
+          petal.innerHTML = buildRoseSvg(roseSize);
+     } else if (kind === "lotus") {
+          var lotusSize = 18 + Math.round(Math.random() * 5);
+          petal.innerHTML = buildLotusSvg(lotusSize);
+     } else if (kind === "blossom") {
+          var blossomSize = 15 + Math.round(Math.random() * 4);
+          petal.innerHTML = buildStarBlossomSvg(blossomSize);
+     } else {
+          var size = 11 + Math.round(Math.random() * 5);
+          petal.innerHTML =
+               '<svg width="' +
+               size +
+               '" height="' +
+               size +
+               '" viewBox="0 0 24 24" fill="none">' +
+               '<path d="M12 3C7 8 7 16 12 21C17 16 17 8 12 3Z" fill="var(--petal-fill)" fill-opacity="0.92" stroke="var(--petal-stroke)" stroke-width="1"/>' +
+               "</svg>";
+     }
      return petal;
 }
 
@@ -68,8 +186,8 @@ function spawnBurstPetals(count) {
      var existingBursts = layer.querySelectorAll(
           ".jasmine-petal.is-burst",
      );
-     if (existingBursts.length >= 10) return;
-     var toAdd = Math.min(count, 10 - existingBursts.length);
+     if (existingBursts.length >= 6) return;
+     var toAdd = Math.min(count, 6 - existingBursts.length);
      for (var i = 0; i < toAdd; i++) {
           var petal = createSinglePetalElement(true);
           layer.appendChild(petal);
@@ -152,9 +270,266 @@ function createPetals() {
      if (!layer) return;
      layer.innerHTML = "";
 
-     for (var i = 0; i < 12; i++) {
-          layer.appendChild(createSinglePetalElement(false));
+     for (var i = 0; i < 3; i++) {
+          layer.appendChild(createSinglePetalElement(false, "petal"));
      }
+     for (var j = 0; j < 2; j++) {
+          layer.appendChild(createSinglePetalElement(false, "sprig"));
+     }
+     for (var k = 0; k < 2; k++) {
+          layer.appendChild(createSinglePetalElement(false, "rose"));
+     }
+     for (var l = 0; l < 2; l++) {
+          layer.appendChild(createSinglePetalElement(false, "lotus"));
+     }
+     layer.appendChild(createSinglePetalElement(false, "blossom"));
+}
+
+// 1B. Ambient Origami Birds (1 flying from start, 2nd joins at RSVP ending)
+var ambientBirdsRaf = null;
+var ambientBird2Joined = false;
+var ambientBird2JoinStartAt = 0;
+var ambientBird2OriginX = 0;
+var ambientBird2OriginY = 0;
+var ambientBirdDist = 0;
+var ambientBirdElapsed = 0;
+var ambientBirdLastNow = 0;
+var ambientBird2Prev = null;
+var ambientOrbitCache = null;
+
+function rawBirdOrbitPoint(theta, vw, vh) {
+     if (vw < 640) {
+          // Vertical figure-8 sweeping across open top/bottom sky and diagonal canvas
+          return {
+               x: vw * (0.5 + 0.4 * Math.sin(2 * theta + 0.3)),
+               y: vh * (0.49 - 0.38 * Math.cos(theta)),
+          };
+     }
+     var dx = (Math.cos(theta) - 0.1 * Math.cos(3 * theta)) / 0.9;
+     return {
+          x: vw * (0.5 + 0.43 * dx),
+          y:
+               vh *
+               (0.49 +
+                    0.38 * Math.sin(2 * theta + 0.35) * 0.82 +
+                    0.06 * Math.cos(theta)),
+     };
+}
+
+function getBirdOrbitTable(vw, vh) {
+     if (
+          ambientOrbitCache &&
+          ambientOrbitCache.vw === vw &&
+          ambientOrbitCache.vh === vh
+     ) {
+          return ambientOrbitCache;
+     }
+     var N = 360;
+     var pts = [];
+     var cum = [0];
+     var total = 0;
+     for (var i = 0; i <= N; i++) {
+          var t = (i / N) * Math.PI * 2;
+          var p = rawBirdOrbitPoint(t, vw, vh);
+          pts.push(p);
+          if (i > 0) {
+               total += Math.hypot(p.x - pts[i - 1].x, p.y - pts[i - 1].y);
+               cum.push(total);
+          }
+     }
+     ambientOrbitCache = { vw: vw, vh: vh, pts: pts, cum: cum, total: total };
+     return ambientOrbitCache;
+}
+
+function sampleBirdOrbitAtDist(table, dist) {
+     var total = table.total || 1;
+     var d = ((dist % total) + total) % total;
+     var cum = table.cum;
+     var pts = table.pts;
+     var lo = 0;
+     var hi = cum.length - 1;
+     while (lo < hi - 1) {
+          var mid = (lo + hi) >> 1;
+          if (cum[mid] <= d) lo = mid;
+          else hi = mid;
+     }
+     var segLen = cum[hi] - cum[lo] || 1;
+     var f = (d - cum[lo]) / segLen;
+     return {
+          x: pts[lo].x + (pts[hi].x - pts[lo].x) * f,
+          y: pts[lo].y + (pts[hi].y - pts[lo].y) * f,
+     };
+}
+
+function applyBirdTransform(el, pos, dx, dy) {
+     if (!el) return;
+     var speed = Math.hypot(dx, dy);
+     var facingLeft = dx < -0.02;
+     var angleRad =
+          speed > 0.01 ? Math.atan2(dy, facingLeft ? -dx : dx) : 0;
+     var deg = Math.max(-28, Math.min(28, angleRad * (180 / Math.PI)));
+
+     el.style.transform =
+          "translate3d(" +
+          pos.x.toFixed(1) +
+          "px, " +
+          pos.y.toFixed(1) +
+          "px, 0) scaleX(" +
+          (facingLeft ? -1 : 1) +
+          ") rotate(" +
+          deg.toFixed(1) +
+          "deg)";
+}
+
+function stepAmbientOrigamiBirds(now) {
+     if (
+          document.hidden ||
+          (window.matchMedia &&
+               window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+     ) {
+          ambientBirdsRaf = null;
+          return;
+     }
+
+     if (!ambientBirdLastNow) ambientBirdLastNow = now;
+     var dt = Math.min(0.06, Math.max(0.001, (now - ambientBirdLastNow) / 1000));
+     ambientBirdLastNow = now;
+     ambientBirdElapsed += dt;
+
+     var vw = window.innerWidth || 375;
+     var vh = window.innerHeight || 667;
+     var table = getBirdOrbitTable(vw, vh);
+     var speedPxPerSec =
+          vw < 640
+               ? Math.max(95, Math.min(125, table.total / 15.5))
+               : Math.max(120, Math.min(145, table.total / 22));
+     ambientBirdDist = (ambientBirdDist + dt * speedPxPerSec) % table.total;
+
+     var bird1 = document.getElementById("ambient-bird-1");
+     var pos1 = sampleBirdOrbitAtDist(table, ambientBirdDist);
+     var ahead1 = sampleBirdOrbitAtDist(table, ambientBirdDist + 10);
+     var behind1 = sampleBirdOrbitAtDist(table, ambientBirdDist - 10);
+     applyBirdTransform(
+          bird1,
+          pos1,
+          ahead1.x - behind1.x,
+          ahead1.y - behind1.y,
+     );
+
+     if (ambientBird2Joined) {
+          var bird2 = document.getElementById("ambient-bird-2");
+          var lagDist = ambientBirdDist - (vw < 640 ? 48 : 66);
+          var base2 = sampleBirdOrbitAtDist(table, lagDist);
+          var weaveX =
+               Math.min(18, vw * 0.03) * Math.cos(ambientBirdElapsed * 1.1);
+          var weaveY =
+               Math.min(14, vh * 0.025) * Math.sin(ambientBirdElapsed * 1.3);
+          var target2 = {
+               x: Math.max(20, Math.min(vw - 20, base2.x + weaveX)),
+               y: Math.max(20, Math.min(vh - 20, base2.y + weaveY)),
+          };
+
+          var rawT = Math.min(
+               1,
+               Math.max(0, (now - ambientBird2JoinStartAt) / 2400),
+          );
+          var easeT = 1 - Math.pow(1 - rawT, 3);
+          var pos2 = {
+               x:
+                    ambientBird2OriginX +
+                    (target2.x - ambientBird2OriginX) * easeT,
+               y:
+                    ambientBird2OriginY +
+                    (target2.y - ambientBird2OriginY) * easeT,
+          };
+          var dx2 = ambientBird2Prev ? pos2.x - ambientBird2Prev.x : 1;
+          var dy2 = ambientBird2Prev ? pos2.y - ambientBird2Prev.y : 0;
+          applyBirdTransform(bird2, pos2, dx2, dy2);
+          ambientBird2Prev = pos2;
+     }
+
+     ambientBirdsRaf = requestAnimationFrame(stepAmbientOrigamiBirds);
+}
+
+function startAmbientOrigamiLoop() {
+     if (
+          ambientBirdsRaf ||
+          document.hidden ||
+          (window.matchMedia &&
+               window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+     )
+          return;
+     ambientBirdLastNow = 0;
+     ambientBirdsRaf = requestAnimationFrame(stepAmbientOrigamiBirds);
+}
+
+function initAmbientOrigamiBirds() {
+     var bird1 = document.getElementById("ambient-bird-1");
+     if (!bird1) return;
+     if (
+          window.matchMedia &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches
+     )
+          return;
+
+     var vw = window.innerWidth || 375;
+     var vh = window.innerHeight || 667;
+     var table = getBirdOrbitTable(vw, vh);
+     ambientBirdDist = table.total * 0.03; // Start visibly in open top sky
+     var initPos = sampleBirdOrbitAtDist(table, ambientBirdDist);
+     var ahead = sampleBirdOrbitAtDist(table, ambientBirdDist + 10);
+     var behind = sampleBirdOrbitAtDist(table, ambientBirdDist - 10);
+     applyBirdTransform(
+          bird1,
+          initPos,
+          ahead.x - behind.x,
+          ahead.y - behind.y,
+     );
+     bird1.classList.add("is-visible");
+
+     document.addEventListener("visibilitychange", function () {
+          if (document.hidden) {
+               if (ambientBirdsRaf) {
+                    cancelAnimationFrame(ambientBirdsRaf);
+                    ambientBirdsRaf = null;
+               }
+          } else {
+               startAmbientOrigamiLoop();
+          }
+     });
+
+     startAmbientOrigamiLoop();
+}
+
+function joinSecondOrigamiBird(startX, startY) {
+     var bird2 = document.getElementById("ambient-bird-2");
+     if (!bird2) return;
+     if (
+          window.matchMedia &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches
+     )
+          return;
+
+     var vw = window.innerWidth || 375;
+     var vh = window.innerHeight || 667;
+     ambientBird2OriginX =
+          typeof startX === "number" ? startX : vw * 0.74;
+     ambientBird2OriginY =
+          typeof startY === "number" ? startY : vh * 0.26;
+     ambientBird2JoinStartAt = performance.now();
+     ambientBird2Joined = true;
+     ambientBird2Prev = {
+          x: ambientBird2OriginX,
+          y: ambientBird2OriginY,
+     };
+     applyBirdTransform(
+          bird2,
+          { x: ambientBird2OriginX, y: ambientBird2OriginY },
+          1,
+          -1,
+     );
+     bird2.classList.add("is-visible");
+     startAmbientOrigamiLoop();
 }
 
 // 2. 4-Sided Viewport Border Progress (driven by active card, no downward scroll)
@@ -287,8 +662,6 @@ function renderStoryPhotobook(animateText) {
      var mediaEl = document.getElementById("story-media");
      var chipEl = document.getElementById("story-photo-chip");
      var titleEl = document.getElementById("story-photo-title");
-     var johnEl = document.getElementById("story-react-john");
-     var mannaEl = document.getElementById("story-react-manna");
      var cloudsEl = document.getElementById("story-clouds");
      var noteOverlay = document.getElementById("story-note-overlay");
      var backNoteEl = document.getElementById("story-back-note");
@@ -296,19 +669,50 @@ function renderStoryPhotobook(animateText) {
 
      if (mediaEl) {
           mediaEl.style.background = cur.bg || "";
-          mediaEl.innerHTML = cur.imgSrc
-               ? '<img src="' +
-                 cur.imgSrc +
-                 '" alt="' +
-                 cur.title +
-                 '" loading="lazy">'
-               : cur.svg;
+          if (cur.imgSrc) {
+               mediaEl.innerHTML = "";
+               var img = document.createElement("img");
+               img.src = cur.imgSrc;
+               img.alt = cur.title || "";
+               img.loading = "lazy";
+               img.style.objectPosition = cur.imgPos || "center 22%";
+               mediaEl.appendChild(img);
+          } else {
+               mediaEl.innerHTML = cur.svg || "";
+          }
      }
      if (chipEl) chipEl.textContent = cur.chip;
      if (titleEl) titleEl.textContent = cur.title;
-     if (johnEl) johnEl.textContent = cur.john;
-     if (mannaEl) mannaEl.textContent = cur.manna;
      if (backNoteEl) backNoteEl.textContent = cur.backNote || "";
+
+     if (cloudsEl) {
+          cloudsEl.innerHTML = "";
+          var msgs = Array.isArray(cur.messages) ? cur.messages : [];
+          msgs.forEach(function (m) {
+               var isManna = m.who === "manna";
+               var bubble = document.createElement("div");
+               bubble.className =
+                    "cloud-bubble " + (isManna ? "is-manna" : "is-john");
+
+               var dot = document.createElement("span");
+               dot.className = "cloud-dot";
+               dot.textContent = isManna ? "M" : "J";
+
+               var p = document.createElement("p");
+               p.className = "cloud-text";
+               p.textContent = m.text;
+
+               bubble.appendChild(dot);
+               bubble.appendChild(p);
+               cloudsEl.appendChild(bubble);
+          });
+
+          cloudsEl.classList.remove("is-popped");
+          if (animateText !== false) {
+               void cloudsEl.offsetWidth;
+          }
+          cloudsEl.classList.add("is-popped");
+     }
 
      if (noteOverlay) {
           noteOverlay.hidden = !storyFrameFlipped;
@@ -319,14 +723,6 @@ function renderStoryPhotobook(animateText) {
                storyFrameFlipped ? "true" : "false",
           );
           flipBtn.textContent = storyFrameFlipped ? "Photo ↺" : "Note ↻";
-     }
-
-     if (cloudsEl) {
-          cloudsEl.classList.remove("is-popped");
-          if (animateText !== false) {
-               void cloudsEl.offsetWidth;
-          }
-          cloudsEl.classList.add("is-popped");
      }
 }
 
@@ -584,6 +980,8 @@ function triggerRsvpOrigami(initialDelayMs) {
                resetFarewellStage();
                return;
           }
+          var anchorX = (window.innerWidth || 375) * 0.5;
+          var anchorY = (window.innerHeight || 667) * 0.5;
           if (birdAnchor) {
                var rect = rsvpSheet.getBoundingClientRect();
                var visibleTop = Math.max(0, rect.top);
@@ -591,13 +989,10 @@ function triggerRsvpOrigami(initialDelayMs) {
                     window.innerHeight,
                     rect.bottom,
                );
-               birdAnchor.style.left =
-                    Math.round(rect.left + rect.width * 0.5) +
-                    "px";
-               birdAnchor.style.top =
-                    Math.round(
-                         (visibleTop + visibleBottom) * 0.5,
-                    ) + "px";
+               anchorX = Math.round(rect.left + rect.width * 0.5);
+               anchorY = Math.round((visibleTop + visibleBottom) * 0.5);
+               birdAnchor.style.left = anchorX + "px";
+               birdAnchor.style.top = anchorY + "px";
           }
           flightLayer.classList.add("is-active");
           requestAnimationFrame(function () {
@@ -605,7 +1000,7 @@ function triggerRsvpOrigami(initialDelayMs) {
                flightLayer.classList.add("is-folding");
           });
 
-          // Phase 2: Wings flap & origami bird flies away
+          // Phase 2: Wings flap & origami bird flies up to join the first bird
           farewellTimers.push(
                setTimeout(function () {
                     if (
@@ -642,15 +1037,19 @@ function triggerRsvpOrigami(initialDelayMs) {
                          }, 1050),
                     );
 
-                    // Clean up flight layer once bird exits sky
+                    // Hand off seamlessly to Bird 2 in the sky so both fly together
                     farewellTimers.push(
                          setTimeout(function () {
+                              joinSecondOrigamiBird(
+                                   anchorX + (window.innerWidth || 375) * 0.24,
+                                   anchorY - (window.innerHeight || 667) * 0.24,
+                              );
                               flightLayer.classList.remove(
                                    "is-active",
                                    "is-folding",
                                    "is-flying",
                               );
-                         }, 1950),
+                         }, 1650),
                     );
                }, 580),
           );
@@ -869,8 +1268,8 @@ function initPaletteSwitcher() {
      });
 }
 
-var VERSE_READ_DELAY_MS = 3200;
-var DETAILS_READ_DELAY_MS = 1800;
+var VERSE_READ_DELAY_MS = 3600;
+var DETAILS_READ_DELAY_MS = 5200;
 var invitationTimer = null;
 var invitationTimerStartedAt = 0;
 var invitationRemainingMs = VERSE_READ_DELAY_MS;
@@ -1166,7 +1565,7 @@ function setupDeckNavigation() {
 
      var MOVIE_DWELL_MS = {
           cover: 2400,
-          invitation: 3400,
+          invitation: 4800,
           schedule: 4200,
           story: 4200,
           travel: 4500,
@@ -2499,21 +2898,6 @@ function initBackgroundMusic() {
      });
 }
 
-function syncInvitationCenterOffset() {
-     var details = document.querySelector(
-          "#invitation-sheet .invitation-details-reveal",
-     );
-     var header = document.querySelector(
-          "#invitation-sheet .invitation-header-block",
-     );
-     if (details && header) {
-          header.style.setProperty(
-               "--invite-center-y",
-               Math.round(details.offsetHeight * 0.5) + "px",
-          );
-     }
-}
-
 function setupGlassGlint() {
      if (
           window.matchMedia &&
@@ -2574,20 +2958,12 @@ function setupGlassGlint() {
 window.addEventListener("DOMContentLoaded", function () {
      initPaletteSwitcher();
      createPetals();
+     initAmbientOrigamiBirds();
      setupGlassGlint();
      setupInvitationTrigger();
      initStoryPhotobook();
      setupDeckNavigation();
      initBackgroundMusic();
-     syncInvitationCenterOffset();
-     if (document.fonts && document.fonts.ready) {
-          document.fonts.ready.then(syncInvitationCenterOffset);
-     }
-     window.addEventListener(
-          "resize",
-          syncInvitationCenterOffset,
-          { passive: true },
-     );
      updateScrollProgress(0);
      updateCountdown();
      setInterval(updateCountdown, 1000);

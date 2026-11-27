@@ -71,12 +71,144 @@
                rel="stylesheet"
           />
 
-          <link rel="stylesheet" href="styles.css?v=4.1" />
+          <link rel="stylesheet" href="styles.css?v=4.13" />
      </head>
      <body>
           <div class="album-world">
                <!-- Ambient Drifting Jasmine Petals Layer -->
                <div id="petals-layer" aria-hidden="true"></div>
+
+               <!-- Ambient Flying Origami Birds Layer (1 from start, 2nd joins at end) -->
+               <div
+                    id="ambient-birds-layer"
+                    class="ambient-birds-layer"
+                    aria-hidden="true"
+               >
+                    <div id="ambient-bird-1" class="ambient-bird is-bird-one">
+                         <svg
+                              class="ambient-bird-svg"
+                              viewBox="0 0 120 100"
+                              fill="none"
+                         >
+                              <g class="origami-wing-back">
+                                   <polygon
+                                        points="48,54 34,14 74,46"
+                                        fill="var(--bg-linen)"
+                                        stroke="var(--kasavu-gold)"
+                                        stroke-width="1.3"
+                                        stroke-linejoin="round"
+                                   />
+                              </g>
+                              <polygon
+                                   points="10,62 48,54 34,70"
+                                   fill="var(--bg-linen)"
+                                   stroke="var(--kasavu-gold)"
+                                   stroke-width="1.3"
+                                   stroke-linejoin="round"
+                              />
+                              <polygon
+                                   points="34,70 48,54 84,50 62,72"
+                                   fill="var(--bg-surface)"
+                                   stroke="var(--kasavu-gold)"
+                                   stroke-width="1.3"
+                                   stroke-linejoin="round"
+                              />
+                              <polygon
+                                   points="68,52 84,50 98,24 90,50"
+                                   fill="var(--bg-cotton)"
+                                   stroke="var(--kasavu-gold)"
+                                   stroke-width="1.3"
+                                   stroke-linejoin="round"
+                              />
+                              <polygon
+                                   points="98,24 114,29 94,35"
+                                   fill="var(--kasavu-gold)"
+                                   stroke="var(--kasavu-gold-deep)"
+                                   stroke-width="1.1"
+                                   stroke-linejoin="round"
+                              />
+                              <g class="origami-wing-front">
+                                   <polygon
+                                        points="44,58 64,10 82,50"
+                                        fill="var(--bg-cotton)"
+                                        stroke="var(--kasavu-gold)"
+                                        stroke-width="1.45"
+                                        stroke-linejoin="round"
+                                   />
+                                   <polygon
+                                        points="64,10 82,50 62,56"
+                                        fill="var(--kasavu-gold-tint)"
+                                        stroke="var(--kasavu-gold)"
+                                        stroke-width="1"
+                                        stroke-linejoin="round"
+                                   />
+                              </g>
+                         </svg>
+                    </div>
+
+                    <div id="ambient-bird-2" class="ambient-bird is-bird-two">
+                         <svg
+                              class="ambient-bird-svg"
+                              viewBox="0 0 120 100"
+                              fill="none"
+                         >
+                              <g class="origami-wing-back">
+                                   <polygon
+                                        points="48,54 34,14 74,46"
+                                        fill="var(--bg-linen)"
+                                        stroke="var(--kasavu-gold-deep)"
+                                        stroke-width="1.3"
+                                        stroke-linejoin="round"
+                                   />
+                              </g>
+                              <polygon
+                                   points="10,62 48,54 34,70"
+                                   fill="var(--bg-linen)"
+                                   stroke="var(--kasavu-gold-deep)"
+                                   stroke-width="1.3"
+                                   stroke-linejoin="round"
+                              />
+                              <polygon
+                                   points="34,70 48,54 84,50 62,72"
+                                   fill="var(--bg-surface)"
+                                   stroke="var(--kasavu-gold-deep)"
+                                   stroke-width="1.3"
+                                   stroke-linejoin="round"
+                              />
+                              <polygon
+                                   points="68,52 84,50 98,24 90,50"
+                                   fill="var(--bg-cotton)"
+                                   stroke="var(--kasavu-gold-deep)"
+                                   stroke-width="1.3"
+                                   stroke-linejoin="round"
+                              />
+                              <polygon
+                                   points="98,24 114,29 94,35"
+                                   fill="var(--ink-primary)"
+                                   stroke="var(--kasavu-gold-deep)"
+                                   stroke-width="1.1"
+                                   stroke-linejoin="round"
+                              />
+                              <g class="origami-wing-front">
+                                   <polygon
+                                        points="44,58 64,10 82,50"
+                                        fill="var(--kasavu-gold-tint)"
+                                        stroke="var(--kasavu-gold-deep)"
+                                        stroke-width="1.45"
+                                        stroke-linejoin="round"
+                                   />
+                                   <polygon
+                                        points="64,10 82,50 62,56"
+                                        fill="var(--kasavu-gold)"
+                                        fill-opacity="0.32"
+                                        stroke="var(--kasavu-gold-deep)"
+                                        stroke-width="1"
+                                        stroke-linejoin="round"
+                                   />
+                              </g>
+                         </svg>
+                    </div>
+               </div>
 
                <!-- 4-Sided Viewport Scroll Progress Frame -->
                <div
@@ -313,6 +445,19 @@
                                                                       Mariyam</span
                                                                  >
                                                                  <span
+                                                                      class="invite-parents"
+                                                                      >Daughter
+                                                                      of
+                                                                      Prasobha
+                                                                      K. Mathew
+                                                                      &amp;
+                                                                      Bavojy
+                                                                      Mamachen,
+                                                                      Plavara
+                                                                      Puthen
+                                                                      Bunglow</span
+                                                                 >
+                                                                 <span
                                                                       class="invite-amp"
                                                                       >&amp;</span
                                                                  >
@@ -320,6 +465,16 @@
                                                                       >John
                                                                       Koodarathil
                                                                       Varkey</span
+                                                                 >
+                                                                 <span
+                                                                      class="invite-parents"
+                                                                      >Son of
+                                                                      Saramma
+                                                                      Varkey
+                                                                      &amp;
+                                                                      Varkey K.
+                                                                      Cheriyan
+                                                                      (Late)</span
                                                                  >
                                                             </h2>
                                                        </div>
@@ -345,9 +500,12 @@
 
                                         <div class="invitation-details-reveal">
                                              <div
-                                                  class="lotus-divider"
-                                                  aria-hidden="true"
+                                                  class="invitation-details-inner"
                                              >
+                                                  <div
+                                                       class="lotus-divider"
+                                                       aria-hidden="true"
+                                                  >
                                                   <span></span>
                                                   <svg
                                                        width="54"
@@ -500,6 +658,7 @@
                                                             >
                                                        </div>
                                                   </div>
+                                             </div>
                                              </div>
                                         </div>
                                    </div>
@@ -877,78 +1036,50 @@
                                         >
                                    </div>
 
-                                   <!-- Cards 1–4: Photo + Cloud Pop-up Conversation -->
+                                   <!-- Cards 1–4: Portrait Photo + Cloud Conversation -->
                                    <div
                                         id="story-photo-view"
                                         class="bumble-photo-card is-hidden"
                                    >
-                                        <div
-                                             id="story-media"
-                                             class="bumble-media"
-                                        ></div>
-                                        <div
-                                             class="bumble-scrim"
-                                             aria-hidden="true"
-                                        ></div>
-
-                                        <!-- Top Chip & Optional Note Toggle -->
-                                        <div class="bumble-top-meta">
-                                             <div class="bumble-title-group">
-                                                  <span
-                                                       id="story-photo-chip"
-                                                       class="bumble-chip"
-                                                  ></span>
-                                                  <h3
-                                                       id="story-photo-title"
-                                                       class="bumble-photo-title"
-                                                  ></h3>
-                                             </div>
-                                             <button
-                                                  id="story-btn-flip"
-                                                  type="button"
-                                                  class="bumble-note-btn"
-                                                  aria-pressed="false"
-                                             >
-                                                  Note ↻
-                                             </button>
+                                        <div class="bumble-media-pane">
+                                             <div
+                                                  id="story-media"
+                                                  class="bumble-media"
+                                             ></div>
+                                             <div
+                                                  class="bumble-scrim"
+                                                  aria-hidden="true"
+                                             ></div>
                                         </div>
 
-                                        <!-- Cloud Pop-ups at the Bottom -->
-                                        <div
-                                             id="story-clouds"
-                                             class="bumble-clouds"
-                                        >
-                                             <div
-                                                  class="cloud-bubble is-john"
-                                             >
-                                                  <span class="cloud-sender">
+                                        <div class="bumble-chat-pane">
+                                             <!-- Top Chip & Optional Note Toggle -->
+                                             <div class="bumble-top-meta">
+                                                  <div class="bumble-title-group">
                                                        <span
-                                                            class="cloud-dot"
-                                                            >J</span
-                                                       >
-                                                       John
-                                                  </span>
-                                                  <p
-                                                       id="story-react-john"
-                                                       class="cloud-text"
-                                                  ></p>
+                                                            id="story-photo-chip"
+                                                            class="bumble-chip"
+                                                       ></span>
+                                                       <h3
+                                                            id="story-photo-title"
+                                                            class="bumble-photo-title"
+                                                       ></h3>
+                                                  </div>
+                                                  <button
+                                                       id="story-btn-flip"
+                                                       type="button"
+                                                       class="bumble-note-btn"
+                                                       aria-pressed="false"
+                                                  >
+                                                       Note ↻
+                                                  </button>
                                              </div>
 
+                                             <!-- Cloud Pop-ups (2-3 Back & Forth) -->
                                              <div
-                                                  class="cloud-bubble is-manna"
-                                             >
-                                                  <span class="cloud-sender">
-                                                       <span
-                                                            class="cloud-dot"
-                                                            >M</span
-                                                       >
-                                                       Manna
-                                                  </span>
-                                                  <p
-                                                       id="story-react-manna"
-                                                       class="cloud-text"
-                                                  ></p>
-                                             </div>
+                                                  id="story-clouds"
+                                                  class="bumble-clouds"
+                                             ></div>
                                         </div>
 
                                         <!-- Optional Note Overlay -->
@@ -1976,8 +2107,8 @@
                </aside>
           </div>
 
-          <script src="story-frames.js?v=4.1" defer></script>
-          <script src="app.js?v=4.1" defer></script>
+          <script src="story-frames.js?v=4.13" defer></script>
+          <script src="app.js?v=4.13" defer></script>
      </body>
 </html>
 
